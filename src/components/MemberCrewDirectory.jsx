@@ -56,15 +56,13 @@ const MemberCrewDirectory = () => {
     fetchCrewMembers();
   }, []);
 
-{/* show members */}
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
-
-  return (
-    <div>
-      <h1>User Data</h1>
-      <pre>{JSON.stringify(crewMembers, null, 2)}</pre>
-    </div>
-);
+ return (
+   <div className="min-h-screen bg-gray-50">
+     <div className="max-w-7xl mx-auto p-6">
+       <h1 className="text-4xl font-bold text-gray-900 mb-8">Crew Directory</h1>
+     </div>
+   </div>
+ );
 }
+
 export default MemberCrewDirectory;
