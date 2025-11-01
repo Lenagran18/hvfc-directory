@@ -60,6 +60,8 @@ const MemberCrewDirectory = () => {
   }, []);
 
   const [selectedMember, setSelectedMember] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
 
   // Detailed member view
   if (selectedMember) {
@@ -86,6 +88,24 @@ const MemberCrewDirectory = () => {
         <h1 className="text-4xl font-bold text-gray-900 mb-8">
           Crew Directory
         </h1>
+
+        {/* Search bar and filter button UI */}
+        <div className="mb-6 flex gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder="Search by name, position, or location..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg"
+            />
+          </div>
+          <button onClick={() => setShowFilterPanel(!showFilterPanel)}>
+            <Filter size={20} />
+            Filters
+          </button>
+        </div>
 
         {/* Display data visually - member card view */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
