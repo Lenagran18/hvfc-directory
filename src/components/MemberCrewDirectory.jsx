@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { Search, Filter } from "lucide-react";
 
@@ -63,6 +63,16 @@ const MemberCrewDirectory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilterPanel, setShowFilterPanel] = useState(false);
 
+  // Show members based on search
+  const filteredMembers = useMemo(() => {
+    return crewMembers.filter(
+      (member) =>
+        member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.location.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [crewMembers, searchTerm]);
+
   // Detailed member view
   if (selectedMember) {
     return (
@@ -109,7 +119,7 @@ const MemberCrewDirectory = () => {
 
         {/* Display data visually - member card view */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {crewMembers.map((member) => (
+          {filteredMembers.map((member) => (
             <div
               key={member.id}
               onClick={() => setSelectedMember(member)}
