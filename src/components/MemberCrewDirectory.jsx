@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
-import { Search, Filter, X, MapPin } from "lucide-react";
+import { Search, Filter, X, MapPin, Mail, Phone, Globe } from "lucide-react";
 
 const MemberCrewDirectory = () => {
   const [crewMembers, setCrewMembers] = useState([]);
@@ -188,13 +188,91 @@ const MemberCrewDirectory = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-4xl mx-auto p-6">
-          <button onClick={() => setSelectedMember(null)}>
-            Back to Directory
+          <button
+            onClick={() => setSelectedMember(null)}
+            className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <X size={20} />
           </button>
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h1>{selectedMember.name}</h1>
-            <p>{selectedMember.position}</p>
-            <p>{selectedMember.bio}</p>
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div className="p-8">
+              <div className="flex flex-col md:flex-row gap-8">
+                <img
+                  alt={selectedMember.name}
+                  src={selectedMember.photo}
+                  className="w-48 h-48 rounded-lg object-cover"
+                />
+                <div className="flex-1">
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    {selectedMember.name}
+                  </h1>
+                  <p className="text-xl text-gray-600 mb-4">
+                    {selectedMember.position}
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {selectedMember.specialties.map((spec, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                      >
+                        {spec}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="space-y-3">
+                    {selectedMember.email && (
+                      <a
+                        href={`mailto:${selectedMember.email}`}
+                        className="flex items-center gap-2 text-gray-700 hover:text-blue-600"
+                      >
+                        <Mail size={18} />
+                        {selectedMember.email}
+                      </a>
+                    )}
+
+                    {selectedMember.phone && (
+                      <a
+                        href={`tel:${selectedMember.phone}`}
+                        className="flex items-center gap-2 text-gray-700 hover:text-blue-600"
+                      >
+                        <Phone size={18} />
+                        {selectedMember.phone}
+                      </a>
+                    )}
+
+                    {selectedMember.website && (
+                      <a
+                        href={selectedMember.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-gray-700 hover:text-blue-600"
+                      >
+                        <Globe size={18} />
+                        {selectedMember.website}
+                      </a>
+                    )}
+
+                    {selectedMember.location && (
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <MapPin size={18} />
+                        {selectedMember.location}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-8 border-t border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  Bio
+                </h2>
+                <p className="text-gray-700 leading-relaxed">
+                  {selectedMember.bio}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
