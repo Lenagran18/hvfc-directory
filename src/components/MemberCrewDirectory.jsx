@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
-import { Search, Filter, X, MapPin, Mail, Phone, Globe } from "lucide-react";
+import { Search, Filter, X, MapPin, Mail, Phone, Globe, ArrowLeft, Users, ExternalLink } from "lucide-react";
 
 const MemberCrewDirectory = () => {
   const [crewMembers, setCrewMembers] = useState([]);
@@ -44,6 +44,7 @@ const MemberCrewDirectory = () => {
           phone: record.fields.Phone || "",
           website: record.fields.Website || "",
           location: record.fields.Location || "",
+          //TO DO: add all fields from hvfc
         }));
 
         setCrewMembers(transformedData);
@@ -58,6 +59,7 @@ const MemberCrewDirectory = () => {
     fetchCrewMembers();
   }, []);
 
+  const [showSignup, setShowSignup] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -183,98 +185,168 @@ const MemberCrewDirectory = () => {
     setSelectedSpecialties([]);
   };
 
-  // Detailed member view
+  //Detailed member view
   if (selectedMember) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto p-6">
-          <button
-            onClick={() => setSelectedMember(null)}
-            className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900"
-          >
-            <X size={20} />
-          </button>
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="p-8">
-              <div className="flex flex-col md:flex-row gap-8">
-                <img
-                  alt={selectedMember.name}
-                  src={selectedMember.photo}
-                  className="w-48 h-48 rounded-lg object-cover"
-                />
-                <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                    {selectedMember.name}
-                  </h1>
-                  <p className="text-xl text-gray-600 mb-4">
-                    {selectedMember.position}
-                  </p>
-
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {selectedMember.specialties.map((spec, idx) => (
-                      <span
-                        key={idx}
-                        className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                      >
-                        {spec}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="space-y-3">
-                    {selectedMember.email && (
-                      <a
-                        href={`mailto:${selectedMember.email}`}
-                        className="flex items-center gap-2 text-gray-700 hover:text-blue-600"
-                      >
-                        <Mail size={18} />
-                        {selectedMember.email}
-                      </a>
-                    )}
-
-                    {selectedMember.phone && (
-                      <a
-                        href={`tel:${selectedMember.phone}`}
-                        className="flex items-center gap-2 text-gray-700 hover:text-blue-600"
-                      >
-                        <Phone size={18} />
-                        {selectedMember.phone}
-                      </a>
-                    )}
-
-                    {selectedMember.website && (
-                      <a
-                        href={selectedMember.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-gray-700 hover:text-blue-600"
-                      >
-                        <Globe size={18} />
-                        {selectedMember.website}
-                      </a>
-                    )}
-
-                    {selectedMember.location && (
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <MapPin size={18} />
-                        {selectedMember.location}
+      <div>
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <button
+              className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              onClick={() => setSelectedMember(null)}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Directory
+            </button>
+          </div>
+        </header>
+  
+        {/* Content */}
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                {/* Member Profile Card */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                  <div className="p-8">
+                    <div className="flex flex-col md:flex-row gap-6">
+                      <img
+                        src={selectedMember.photo}
+                        alt={selectedMember.name}
+                        className="w-48 h-48 rounded-lg object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h1 className="text-3xl font-bold text-gray-900">
+                            {selectedMember.name}
+                          </h1>
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-600 text-white">
+                            {selectedMember.position}
+                          </span>
+                        </div>
+                        {selectedMember.location && (
+                          <div className="flex items-center gap-2 text-gray-600">
+                            <MapPin className="h-4 w-4" />
+                            {selectedMember.location}
+                          </div>
+                        )}
+                        <p className="text-slate-700 leading-relaxed mt-4">
+                          {selectedMember.bio || "No bio available."}
+                        </p>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
+  
+                {/* TO DO: What info to show here? will need to replace texts */}
+                {/* About */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                  <div className="p-6">
+                    <h2 className="text-2xl font-semibold mb-4">About</h2>
+                    <p className="text-slate-700 leading-relaxed">
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                      do eiusmod tempor incididunt ut labore et dolore magna
+                      aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                      ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                      Duis aute irure dolor in reprehenderit in voluptate velit
+                      esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
+                      occaecat cupidatat non proident, sunt in culpa qui officia
+                      deserunt mollit anim id est laborum.
+                    </p>
+                  </div>
+                </div>
+  
+                {/* Skills & Specialties */}
+                {selectedMember.specialties &&
+                  selectedMember.specialties.length > 0 && (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                      <div className="p-6">
+                        <h2 className="text-2xl font-semibold mb-4">
+                          Skills & Specialties
+                        </h2>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedMember.specialties.map((skill, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-3 py-1 rounded text-sm font-medium bg-slate-100 text-slate-900"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
               </div>
-
-              <div className="mt-8 pt-8 border-t border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Bio
-                </h2>
-                <p className="text-gray-700 leading-relaxed">
-                  {selectedMember.bio}
-                </p>
+  
+              {/* Sidebar */}
+              <div className="space-y-6">
+                {/* Contact Info */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                  <div className="p-6">
+                    <h3 className="text-lg font-semibold mb-4">
+                      Contact Information
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="p-4 bg-blue-50 rounded-lg">
+                        <p className="text-slate-600 mb-2 flex items-center gap-2">
+                          <Mail className="h-4 w-4" />
+                          Email
+                        </p>
+                        <p className="text-slate-400 blur-sm select-none text-sm">
+                          member@email.com
+                        </p>
+                        <p className="text-slate-500 text-sm mt-2">
+                          <em>Members only</em>
+                        </p>
+                      </div>
+                      <div className="p-4 bg-blue-50 rounded-lg">
+                        <p className="text-slate-600 mb-2 flex items-center gap-2">
+                          <Phone className="h-4 w-4" />
+                          Phone
+                        </p>
+                        <p className="text-slate-400 blur-sm select-none text-sm">
+                          (555) 555-5555
+                        </p>
+                        <p className="text-slate-500 text-sm mt-2">
+                          <em>Members only</em>
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+                      onClick={() => setShowSignup(true)}
+                    >
+                      <Users className="h-4 w-4" />
+                      Become a Member
+                    </button>
+                  </div>
+                </div>
+  
+                {/* Links */}
+                {selectedMember.website && (
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div className="p-6">
+                      <h3 className="text-lg font-semibold mb-3">Links</h3>
+                      <div className="space-y-2">
+                        <a
+                          href={selectedMember.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Website
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     );
   }
