@@ -49,7 +49,7 @@ const MemberCrewDirectory = () => {
     {
       name: "Production",
       roles: ["Producers", "UPMs", "Production Coordinators", "Secretaries"],
-    },
+    }, 
     {
       name: "Assistant Directors",
       roles: ["1st ADs", "2nd ADs", "2nd 2nd ADs"],
