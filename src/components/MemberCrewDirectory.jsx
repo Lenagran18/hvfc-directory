@@ -11,26 +11,7 @@ const MemberCrewDirectory = () => {
     // Fetch airtable data
     const fetchCrewMembers = async () => {
       try {
-        // Airtable API credentials from .env
-        const token = process.env.REACT_APP_AIRTABLE_API;
-        const baseId = process.env.REACT_APP_AIRTABLE_BASE_ID;
-        const tableName = process.env.REACT_APP_AIRTABLE_TABLE_NAME;
-
-        if (!token || !baseId) {
-          throw new Error("Missing Airtable credentials check .env file.");
-        }
-        // Fetch data from Airtable
-        const response = await axios.get(
-          `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(
-            tableName
-          )}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
+       const response = await axios.get("/.netlify/functions/getMembers");
         // Transform Airtable records to hvfc format
         const transformedData = response.data.records.map((record) => ({
           id: record.id,
