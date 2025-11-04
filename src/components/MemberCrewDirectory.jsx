@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
-import { Search, Filter, X, MapPin, Mail, Phone, Globe, ArrowLeft, Users, ExternalLink } from "lucide-react";
+import { Search, Filter, X, MapPin, Mail, Phone, ArrowLeft, Users, ExternalLink } from "lucide-react";
 
 const MemberCrewDirectory = () => {
   const [crewMembers, setCrewMembers] = useState([]);
