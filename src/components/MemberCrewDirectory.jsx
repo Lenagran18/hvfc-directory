@@ -59,7 +59,6 @@ const MemberCrewDirectory = () => {
     fetchCrewMembers();
   }, []);
 
-  const [showSignup, setShowSignup] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -185,6 +184,22 @@ const MemberCrewDirectory = () => {
     setSelectedSpecialties([]);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-600">
+        Loading...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500">
+        {error}
+      </div>
+    );
+  }
+
   //Detailed member view
   if (selectedMember) {
     return (
@@ -201,7 +216,7 @@ const MemberCrewDirectory = () => {
             </button>
           </div>
         </header>
-  
+
         {/* Content */}
         <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -238,25 +253,25 @@ const MemberCrewDirectory = () => {
                     </div>
                   </div>
                 </div>
-  
+
                 {/* TO DO: What info to show here? will need to replace texts */}
                 {/* About */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                   <div className="p-6">
                     <h2 className="text-2xl font-semibold mb-4">About</h2>
                     <p className="text-slate-700 leading-relaxed">
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                      do eiusmod tempor incididunt ut labore et dolore magna
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                      sed do eiusmod tempor incididunt ut labore et dolore magna
                       aliqua. Ut enim ad minim veniam, quis nostrud exercitation
                       ullamco laboris nisi ut aliquip ex ea commodo consequat.
                       Duis aute irure dolor in reprehenderit in voluptate velit
-                      esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-                      occaecat cupidatat non proident, sunt in culpa qui officia
-                      deserunt mollit anim id est laborum.
+                      esse cillum dolore eu fugiat nulla pariatur. Excepteur
+                      sint occaecat cupidatat non proident, sunt in culpa qui
+                      officia deserunt mollit anim id est laborum.
                     </p>
                   </div>
                 </div>
-  
+
                 {/* Skills & Specialties */}
                 {selectedMember.specialties &&
                   selectedMember.specialties.length > 0 && (
@@ -279,7 +294,7 @@ const MemberCrewDirectory = () => {
                     </div>
                   )}
               </div>
-  
+
               {/* Sidebar */}
               <div className="space-y-6">
                 {/* Contact Info */}
@@ -314,16 +329,16 @@ const MemberCrewDirectory = () => {
                         </p>
                       </div>
                     </div>
-                    <button
+                    {/* Become a member button TO DO: link will need to change */}
+                    <a
+                      href="https://https://walrus-aqua-5zw3.squarespace.com/become-a-member"
                       className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
-                      onClick={() => setShowSignup(true)}
                     >
                       <Users className="h-4 w-4" />
                       Become a Member
-                    </button>
+                    </a>
                   </div>
                 </div>
-  
                 {/* Links */}
                 {selectedMember.website && (
                   <div className="bg-white rounded-lg shadow-sm border border-gray-200">
