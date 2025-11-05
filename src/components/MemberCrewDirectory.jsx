@@ -328,7 +328,10 @@ const MemberCrewDirectory = () => {
                       <h3 className="text-lg font-semibold mb-3">Links</h3>
                       <div className="space-y-2">
                         <a
-                          href={selectedMember.website}
+                          href={selectedMember.website?.startsWith('http')
+                            ? selectedMember.website
+                            : `https://${selectedMember.website}`
+                          }
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm"
