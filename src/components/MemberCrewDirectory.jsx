@@ -1,13 +1,22 @@
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { Search, Filter, X, MapPin, Mail, Phone, ArrowLeft, Users, ExternalLink } from "lucide-react";
+import { useOutsetaAuth } from "../hooks/useOutsetaAuth";
 
 const MemberCrewDirectory = () => {
+  const { isAuthenticated, loading: authLoading, user } = useOutsetaAuth();
   const [crewMembers, setCrewMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log("Auth Status:", { isAuthenticated, authLoading, user });
+  }, [isAuthenticated, authLoading, user]);
+
+  useEffect(() => {
+
+    if (authLoading) return; // Wait for auth to load
+
     // Fetch airtable data
     const fetchCrewMembers = async () => {
       try {
@@ -38,8 +47,8 @@ const MemberCrewDirectory = () => {
     };
 
     fetchCrewMembers();
-  }, []);
-
+  }, [authLoading, isAuthenticated]);
+  
   const [selectedMember, setSelectedMember] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -165,7 +174,7 @@ const MemberCrewDirectory = () => {
     setSelectedSpecialties([]);
   };
 
-  if (loading) {
+  if (loading|| authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-600">
         Loading...
@@ -285,40 +294,79 @@ const MemberCrewDirectory = () => {
                       Contact Information
                     </h3>
                     <div className="space-y-4">
-                      <div className="p-4 bg-blue-50 rounded-lg">
-                        <p className="text-slate-600 mb-2 flex items-center gap-2">
-                          <Mail className="h-4 w-4" />
-                          Email
-                        </p>
-                        <p className="text-slate-400 blur-sm select-none text-sm">
-                          member@email.com
-                        </p>
-                        <p className="text-slate-500 text-sm mt-2">
-                          <em>Members only</em>
-                        </p>
-                      </div>
-                      <div className="p-4 bg-blue-50 rounded-lg">
-                        <p className="text-slate-600 mb-2 flex items-center gap-2">
-                          <Phone className="h-4 w-4" />
-                          Phone
-                        </p>
-                        <p className="text-slate-400 blur-sm select-none text-sm">
-                          (555) 555-5555
-                        </p>
-                        <p className="text-slate-500 text-sm mt-2">
-                          <em>Members only</em>
-                        </p>
-                      </div>
+                      {isAuthenticated ? (
+                        // Members see all contact info
+                        <>
+                          {selectedMember.email && (
+                            <div className="p-4 bg-blue-50 rounded-lg">
+                              <p className="text-slate-600 mb-2 flex items-center gap-2">
+                                <Mail className="h-4 w-4" />
+                                Email
+                              </p>
+                              
+                                <a href={`mailto:${selectedMember.email}`}
+                                className="text-blue-600 hover:text-blue-700 text-sm"
+                              >
+                                {selectedMember.email}
+                              </a>
+                            </div>
+                          )}
+                          {selectedMember.phone && (
+                            <div className="p-4 bg-blue-50 rounded-lg">
+                              <p className="text-slate-600 mb-2 flex items-center gap-2">
+                                <Phone className="h-4 w-4" />
+                                Phone
+                              </p>
+                              
+                                <a href={`tel:${selectedMember.phone}`}
+                                className="text-blue-600 hover:text-blue-700 text-sm"
+                              >
+                                {selectedMember.phone}
+                              </a>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        // Non-members users see blurred contact info
+                        <>
+                          <div className="p-4 bg-blue-50 rounded-lg">
+                            <p className="text-slate-600 mb-2 flex items-center gap-2">
+                              <Mail className="h-4 w-4" />
+                              Email
+                            </p>
+                            <p className="text-slate-400 blur-sm select-none text-sm">
+                              member@email.com
+                            </p>
+                            <p className="text-slate-500 text-sm mt-2">
+                              <em>Members only</em>
+                            </p>
+                          </div>
+                          <div className="p-4 bg-blue-50 rounded-lg">
+                            <p className="text-slate-600 mb-2 flex items-center gap-2">
+                              <Phone className="h-4 w-4" />
+                              Phone
+                            </p>
+                            <p className="text-slate-400 blur-sm select-none text-sm">
+                              (555) 555-5555
+                            </p>
+                            <p className="text-slate-500 text-sm mt-2">
+                              <em>Members only</em>
+                            </p>
+                          </div>
+                        </>
+                      )}
                     </div>
-                    {/* Become a member button TO DO: link will need to change */}
-                    <a
-                      href="https://walrus-aqua-5zw3.squarespace.com/become-a-member"
-                      target="_top"
-                      className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
-                    >
-                      <Users className="h-4 w-4" />
-                      Become a Member
-                    </a>
+                    {/* Show "Become a Member" button only to non-members */}
+                    {!isAuthenticated && (
+                    
+                        <a href="https://walrus-aqua-5zw3.squarespace.com/become-a-member"
+                        target="_top"
+                        className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+                      >
+                        <Users className="h-4 w-4" />
+                        Become a Member
+                      </a>
+                    )}
                   </div>
                 </div>
                 {/* Links */}
