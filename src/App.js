@@ -1,6 +1,6 @@
 import MemberCrewDirectory from "./components/MemberCrewDirectory";
 import NonMemberCrewDirectory from "./components/NonMemberCrewDirectory";
-import LocationDirectory from "./components/locationDirectory";
+import LocationDirectory from "./components/LocationDirectory";
 import JobBoard from "./components/JobBoard";
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
