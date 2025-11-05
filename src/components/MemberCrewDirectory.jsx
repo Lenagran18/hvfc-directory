@@ -355,9 +355,6 @@ const MemberCrewDirectory = () => {
     // Crew Directory Grid View
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto p-6">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">
-          Crew Directory
-        </h1>
 
         {/* Search bar */}
         <div className="mb-6 flex gap-3">
