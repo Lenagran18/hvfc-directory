@@ -199,7 +199,7 @@ const MemberCrewDirectory = () => {
         </header>
 
         {/* Content */}
-        <section className="py-16 bg-gray-50">
+        <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
@@ -355,7 +355,6 @@ const MemberCrewDirectory = () => {
     // Crew Directory Grid View
     <div className="min-h-screen bg-white-50">
       <div className="max-w-7xl mx-auto p-6">
-
         {/* Search bar */}
         <div className="mb-6 flex gap-3">
           <div className="relative flex-1">
@@ -505,7 +504,7 @@ const MemberCrewDirectory = () => {
                 <div
                   key={member.id}
                   onClick={() => setSelectedMember(member)}
-                  className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
+                  className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
                 >
                   <img
                     src={member.photo}
