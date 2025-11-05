@@ -353,7 +353,7 @@ const MemberCrewDirectory = () => {
 
   return (
     // Crew Directory Grid View
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white-50">
       <div className="max-w-7xl mx-auto p-6">
 
         {/* Search bar */}
