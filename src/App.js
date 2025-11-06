@@ -1,5 +1,4 @@
-import MemberCrewDirectory from "./components/MemberCrewDirectory";
-import NonMemberCrewDirectory from "./components/NonMemberCrewDirectory";
+import CrewDirectory from "./components/CrewDirectory";
 import LocationDirectory from "./components/LocationDirectory";
 import JobBoard from "./components/JobBoard";
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -8,9 +7,8 @@ function App() {
     return ( 
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<Navigate to="/MemberCrewDirectory" replace />} />
-                <Route path="/MemberCrewDirectory" element={<MemberCrewDirectory />} />
-                <Route path="/NonMemberCrewDirectory" element={<NonMemberCrewDirectory />} />
+                <Route path="/" element={<Navigate to="/CrewDirectory" replace />} />
+                <Route path="/CrewDirectory" element={<CrewDirectory />} />
                 <Route path="/LocationDirectory" element={<LocationDirectory />} />
                 <Route path="/JobBoard" element={<JobBoard />} />
             </Routes>

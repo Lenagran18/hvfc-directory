@@ -3,7 +3,7 @@ import axios from "axios";
 import { Search, Filter, X, MapPin, Mail, Phone, ArrowLeft, Users, ExternalLink } from "lucide-react";
 import { useOutsetaAuth } from "../hooks/useOutsetaAuth";
 
-const MemberCrewDirectory = () => {
+const CrewDirectory = () => {
   const { isAuthenticated, loading: authLoading, user } = useOutsetaAuth();
   const [crewMembers, setCrewMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -603,4 +603,4 @@ const MemberCrewDirectory = () => {
   );
 };
 
-export default MemberCrewDirectory;
+export default CrewDirectory;
