@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import axios from "axios";
 import {
   Search,
@@ -19,6 +19,9 @@ const LocationDirectory = () => {
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState("grid");
   const [mapsApiKey, setMapsApiKey] = useState("");
+  const mapRef = useRef(null);
+  const googleMapRef = useRef(null);
+  const markersRef = useRef([]);
 
   useEffect(() => {
     // Fetch airtable data
@@ -67,6 +70,7 @@ const LocationDirectory = () => {
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [selectedPropertyTypes, setSelectedPropertyTypes] = useState([]);
   const [selectedCurrentPhotoIndex, setSelectedCurrentPhotoIndex] = useState(0);
+  const [hoveredLocation, setHoveredLocation] = useState(null);
   const propertyTypes = [
     "Airports",
     "Animals",
@@ -135,6 +139,81 @@ const LocationDirectory = () => {
     ].filter(Boolean);
     return parts.join(", ");
   };
+
+  useEffect(() => {
+    if (!mapsApiKey || viewMode !== "map" || !mapRef.current) return;
+
+    const initMap = async () => {
+      if (!window.google) {
+        const script = document.createElement("script");
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+
+        await new Promise((resolve) => {
+          script.onload = resolve;
+        });
+      }
+
+      markersRef.current.forEach((marker) => marker.setMap(null));
+      markersRef.current = [];
+
+      const center =
+        filteredLocations.length > 0 && filteredLocations[0].city
+          ? { lat: 41.8, lng: -74.0 }
+          : { lat: 39.8283, lng: -98.5795 };
+
+      if (!googleMapRef.current) {
+        googleMapRef.current = new window.google.maps.Map(mapRef.current, {
+          zoom: 8,
+          center: center,
+        });
+      }
+
+      const bounds = new window.google.maps.LatLngBounds();
+      const geocoder = new window.google.maps.Geocoder();
+
+      for (const location of filteredLocations) {
+        const address = getFullAddress(location);
+        if (!address) continue;
+
+        try {
+          const result = await new Promise((resolve, reject) => {
+            geocoder.geocode({ address: address }, (results, status) => {
+              if (status === "OK") {
+                resolve(results[0]);
+              } else {
+                reject(status);
+              }
+            });
+          });
+
+          const marker = new window.google.maps.Marker({
+            position: result.geometry.location,
+            map: googleMapRef.current,
+            title: location.name,
+            animation: window.google.maps.Animation.DROP,
+          });
+
+          marker.addListener("click", () => {
+            setHoveredLocation(location); 
+          });
+
+          markersRef.current.push(marker);
+          bounds.extend(result.geometry.location);
+        } catch (err) {
+          console.error(`Failed to geocode ${address}:`, err);
+        }
+      }
+
+      if (markersRef.current.length > 0) {
+        googleMapRef.current.fitBounds(bounds);
+      }
+    };
+
+    initMap();
+  }, [mapsApiKey, viewMode, filteredLocations]);
 
   if (loading) {
     return (
@@ -343,31 +422,32 @@ const LocationDirectory = () => {
                 </div>
 
                 {/* Map */}
-                {mapsApiKey && (selectedLocation.address || selectedLocation.city) && (
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                    <div className="p-6">
-                      <h3 className="text-lg font-semibold mb-3">
-                        Location Map
-                      </h3>
-                      <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                        <iframe
-                          width="100%"
-                          height="100%"
-                          frameBorder="0"
-                          style={{ border: 0 }}
-                          src={`https://www.google.com/maps/embed/v1/place?key=${mapsApiKey}&q=${encodeURIComponent(
-                            getFullAddress(selectedLocation)
-                          )}`}
-                          allowFullScreen
-                          title="Location Map"
-                        />
+                {mapsApiKey &&
+                  (selectedLocation.address || selectedLocation.city) && (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                      <div className="p-6">
+                        <h3 className="text-lg font-semibold mb-3">
+                          Location Map
+                        </h3>
+                        <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                          <iframe
+                            width="100%"
+                            height="100%"
+                            frameBorder="0"
+                            style={{ border: 0 }}
+                            src={`https://www.google.com/maps/embed/v1/place?key=${mapsApiKey}&q=${encodeURIComponent(
+                              getFullAddress(selectedLocation)
+                            )}`}
+                            allowFullScreen
+                            title="Location Map"
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">
+                          Cannot display map view
+                        </p>
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Cannot display map view
-                      </p>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             </div>
           </div>
@@ -514,29 +594,90 @@ const LocationDirectory = () => {
 
             {/* Map View */}
             {viewMode === "map" && mapsApiKey && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div style={{ height: "600px" }} className="relative">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    style={{ border: 0 }}
-                    src={`https://www.google.com/maps/embed/v1/search?key=${mapsApiKey}&q=${encodeURIComponent(
-                      filteredLocations
-                        .map((loc) => getFullAddress(loc))
-                        .filter(Boolean)
-                        .join("|")
-                    )}`}
-                    allowFullScreen
-                    title="Locations Map"
-                  />
-                </div>
+              <div className="relative h-[600px]">
+                <div ref={mapRef} className="absolute inset-0" />
+
+                {/* Card Overlay */}
+                {hoveredLocation && (
+                  <div className="absolute bottom-4 right-4 w-11/12 sm:w-96 z-10 pointer-events-none">
+                    <div className="bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden pointer-events-auto">
+                      <button
+                        onClick={() => setHoveredLocation(null)}
+                        className="absolute top-2 right-2 z-20 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+
+                      <div
+                        onClick={() => {
+                          setSelectedLocation(hoveredLocation);
+                          setSelectedCurrentPhotoIndex(0);
+                          setHoveredLocation(null);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <div className="relative h-48 bg-gray-100 overflow-hidden">
+                          {hoveredLocation.photos &&
+                          hoveredLocation.photos.length > 0 ? (
+                            <img
+                              src={
+                                hoveredLocation.photos[0]?.url ||
+                                hoveredLocation.photos[0]
+                              }
+                              alt={hoveredLocation.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Home className="h-12 w-12 text-gray-400" />
+                            </div>
+                          )}
+                          {hoveredLocation.photos &&
+                            hoveredLocation.photos.length > 1 && (
+                              <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+                                <ImageIcon size={12} />
+                                {hoveredLocation.photos.length}
+                              </div>
+                            )}
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                            {hoveredLocation.name}
+                          </h3>
+                          {hoveredLocation.propertyType && (
+                            <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium mb-2">
+                              {hoveredLocation.propertyType}
+                            </span>
+                          )}
+                          <div className="flex items-start gap-2 text-sm text-gray-600 mb-3">
+                            <MapPin
+                              size={16}
+                              className="flex-shrink-0 mt-0.5"
+                            />
+                            <span>
+                              {hoveredLocation.city && hoveredLocation.state
+                                ? `${hoveredLocation.city}, ${hoveredLocation.state}`
+                                : "Location not available"}
+                            </span>
+                          </div>
+                          <div className="text-sm text-blue-600 font-medium">
+                            Click to view details →
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="p-4 bg-gray-50 border-t border-gray-200">
                   <div className="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto">
                     {filteredLocations.map((location) => (
                       <button
                         key={location.id}
-                        onClick={() => setSelectedLocation(location)}
+                        onClick={() => {
+                          setSelectedLocation(location);
+                          setSelectedCurrentPhotoIndex(0);
+                        }}
                         className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all text-left"
                       >
                         <div className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
