@@ -16,6 +16,7 @@ exports.handler = async (event, context) => {
     const token = process.env.LOCATIONS_AIRTABLE_API;
     const baseId = process.env.LOCATIONS_AIRTABLE_BASE_ID;
     const tableName = process.env.LOCATIONS_AIRTABLE_TABLE_NAME;
+    const mapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
 
     const response = await axios.get(
       `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName || '')}`,
@@ -29,7 +30,10 @@ exports.handler = async (event, context) => {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify(response.data)
+      body: JSON.stringify({
+        records: response.data.records,
+        mapsApiKey: mapsApiKey || ''
+      })
     };
   } catch (error) {
     return {

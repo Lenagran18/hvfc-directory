@@ -18,12 +18,19 @@ const LocationDirectory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState("grid");
+  const [mapsApiKey, setMapsApiKey] = useState("");
 
   useEffect(() => {
     // Fetch airtable data
     const fetchLocationData = async () => {
       try {
         const response = await axios.get("/.netlify/functions/getLocations");
+
+        //Maps API Key
+        if (response.data.mapsApiKey) {
+          setMapsApiKey(response.data.mapsApiKey);
+        }
+
         // Transform Airtable records to location format
         const transformedData = response.data.records
           .filter((record) => record.fields.Approved === true) // Only show approved locations
@@ -97,9 +104,8 @@ const LocationDirectory = () => {
         location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         location.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         location.state?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        location.address?.toLowerCase().includes(searchTerm.toLowerCase());
-        location.propertyType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        location.address.toLowerCase().includes(searchTerm.toLowerCase());
+        location.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        location.propertyType.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesPropertyType =
         selectedPropertyTypes.length === 0 ||
@@ -117,6 +123,17 @@ const LocationDirectory = () => {
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedPropertyTypes([]);
+  };
+
+  const getFullAddress = (location) => {
+    const parts = [
+      location.address,
+      location.city,
+      location.state,
+      location.zipCode,
+      location.country,
+    ].filter(Boolean);
+    return parts.join(", ");
   };
 
   if (loading) {
@@ -324,6 +341,33 @@ const LocationDirectory = () => {
                     </a>
                   </div>
                 </div>
+
+                {/* Map */}
+                {mapsApiKey && (selectedLocation.address || selectedLocation.city) && (
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div className="p-6">
+                      <h3 className="text-lg font-semibold mb-3">
+                        Location Map
+                      </h3>
+                      <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          frameBorder="0"
+                          style={{ border: 0 }}
+                          src={`https://www.google.com/maps/embed/v1/place?key=${mapsApiKey}&q=${encodeURIComponent(
+                            getFullAddress(selectedLocation)
+                          )}`}
+                          allowFullScreen
+                          title="Location Map"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Cannot display map view
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -469,8 +513,66 @@ const LocationDirectory = () => {
             </div>
 
             {/* Map View */}
-            {viewMode === "map" && (
-              <div className="h-[500px] mb-6">
+            {viewMode === "map" && mapsApiKey && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div style={{ height: "600px" }} className="relative">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    style={{ border: 0 }}
+                    src={`https://www.google.com/maps/embed/v1/search?key=${mapsApiKey}&q=${encodeURIComponent(
+                      filteredLocations
+                        .map((loc) => getFullAddress(loc))
+                        .filter(Boolean)
+                        .join("|")
+                    )}`}
+                    allowFullScreen
+                    title="Locations Map"
+                  />
+                </div>
+                <div className="p-4 bg-gray-50 border-t border-gray-200">
+                  <div className="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto">
+                    {filteredLocations.map((location) => (
+                      <button
+                        key={location.id}
+                        onClick={() => setSelectedLocation(location)}
+                        className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all text-left"
+                      >
+                        <div className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
+                          {location.photos && location.photos.length > 0 ? (
+                            <img
+                              src={
+                                location.photos[0]?.url || location.photos[0]
+                              }
+                              alt={location.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Home className="h-6 w-6 text-gray-400" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-gray-900 truncate">
+                            {location.name}
+                          </h4>
+                          <p className="text-sm text-gray-600 truncate">
+                            {location.city && location.state
+                              ? `${location.city}, ${location.state}`
+                              : getFullAddress(location)}
+                          </p>
+                          {location.propertyType && (
+                            <span className="inline-block mt-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+                              {location.propertyType}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -514,7 +616,7 @@ const LocationDirectory = () => {
                       <div className="flex items-start gap-2 text-sm text-gray-600">
                         <MapPin size={16} className="flex-shrink-0 mt-0.5" />
                         <span className="line-clamp-2">
-                          {location.city && location.state 
+                          {location.city && location.state
                             ? `${location.city}, ${location.state}`
                             : "Location not available"}
                         </span>
