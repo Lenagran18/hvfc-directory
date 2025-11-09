@@ -95,13 +95,12 @@ const LocationDirectory = () => {
         location.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         location.state?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         location.address?.toLowerCase().includes(searchTerm.toLowerCase());
+        location.propertyType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        location.address.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesPropertyType =
         selectedPropertyTypes.length === 0 ||
-        selectedPropertyTypes.some((spec) =>
-          location.propertyType?.includes(spec)
-        );
-
+        selectedPropertyTypes.includes(location.propertyType);  
       return matchesSearch && matchesPropertyType;
     });
   }, [locations, searchTerm, selectedPropertyTypes]);
