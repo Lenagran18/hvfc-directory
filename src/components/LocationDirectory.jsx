@@ -276,7 +276,6 @@ const LocationDirectory = () => {
                       <div className="flex items-start gap-3">
                         <MapPin className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                         <div>
-                          <p className="text-gray-600 font-medium">Address</p>
                           <p className="text-gray-900">
                             {selectedLocation.city && selectedLocation.state
                               ? `${selectedLocation.city}, ${selectedLocation.state}`
