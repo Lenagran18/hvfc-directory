@@ -6,7 +6,7 @@ import {
   X,
   MapPin, 
   ArrowLeft,
-  ImageIcon,
+  Image as ImageIcon,
   Mail,
   Home,
   Grid3x3,
