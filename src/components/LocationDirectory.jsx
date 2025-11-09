@@ -8,13 +8,16 @@ import {
   ArrowLeft,
   ImageIcon,
   Mail,
-  Home
+  Home,
+  Grid3x3,
+  Map
 } from "lucide-react";
 
 const LocationDirectory = () => {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [viewMode, setViewMode] = useState("grid");
 
   useEffect(() => {
     // Fetch airtable data
@@ -364,6 +367,34 @@ const LocationDirectory = () => {
           </button>
         </div>
 
+        {/* View Toggle */}
+        <div className="mb-6 flex items-center justify-center">
+          <div className="flex gap-2 bg-white border border-gray-300 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${
+                viewMode === "grid"
+                  ? "bg-blue-600 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <Grid3x3 size={18} />
+              Grid
+            </button>
+            <button
+              onClick={() => setViewMode("map")}
+              className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${
+                viewMode === "map"
+                  ? "bg-blue-600 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <Map size={18} />
+              Map
+            </button>
+          </div>
+        </div>
+
         {/* Selected Filters */}
         {selectedPropertyTypes.length > 0 && (
           <div className="mb-6 flex items-center gap-2 flex-wrap">
@@ -437,54 +468,62 @@ const LocationDirectory = () => {
               {filteredLocations.length === 1 ? "" : "s"}
             </div>
 
+            {/* Map View */}
+            {viewMode === "map" && (
+              <div className="h-[500px] mb-6">
+              </div>
+            )}
+
             {/* Location card view */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredLocations.map((location) => (
-                <div
-                  key={location.id}
-                  onClick={() => setSelectedLocation(location)}
-                  className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
-                >
-                  <div className="relative h-48 bg-gray-100 overflow-hidden">
-                    {location.photos && location.photos.length > 0 ? (
-                      <img
-                        src={location.photos[0]?.url || location.photos[0]}
-                        alt={location.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Home className="h-12 w-12 text-gray-400" />
+            {viewMode === "grid" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredLocations.map((location) => (
+                  <div
+                    key={location.id}
+                    onClick={() => setSelectedLocation(location)}
+                    className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
+                  >
+                    <div className="relative h-48 bg-gray-100 overflow-hidden">
+                      {location.photos && location.photos.length > 0 ? (
+                        <img
+                          src={location.photos[0]?.url || location.photos[0]}
+                          alt={location.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Home className="h-12 w-12 text-gray-400" />
+                        </div>
+                      )}
+                      {location.photos && location.photos.length > 1 && (
+                        <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+                          <ImageIcon size={12} />
+                          {location.photos.length}
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                        {location.name}
+                      </h3>
+                      {location.propertyType && (
+                        <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium mb-3">
+                          {location.propertyType}
+                        </span>
+                      )}
+                      <div className="flex items-start gap-2 text-sm text-gray-600">
+                        <MapPin size={16} className="flex-shrink-0 mt-0.5" />
+                        <span className="line-clamp-2">
+                          {location.city && location.state 
+                            ? `${location.city}, ${location.state}`
+                            : "Location not available"}
+                        </span>
                       </div>
-                    )}
-                    {location.photos && location.photos.length > 1 && (
-                      <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
-                        <ImageIcon size={12} />
-                        {location.photos.length}
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                      {location.name}
-                    </h3>
-                    {location.propertyType && (
-                      <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium mb-3">
-                        {location.propertyType}
-                      </span>
-                    )}
-                    <div className="flex items-start gap-2 text-sm text-gray-600">
-                      <MapPin size={16} className="flex-shrink-0 mt-0.5" />
-                      <span className="line-clamp-2">
-                        {location.city && location.state 
-                          ? `${location.city}, ${location.state}`
-                          : "Location not available"}
-                      </span>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             {filteredLocations.length === 0 && (
               <div className="text-center py-12">
