@@ -683,52 +683,6 @@ useEffect(() => {
                     </div>
                   </div>
                 )}
-
-                <div className="p-4 bg-gray-50 border-t border-gray-200">
-                  <div className="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto">
-                    {filteredLocations.map((location) => (
-                      <button
-                        key={location.id}
-                        onClick={() => {
-                          setSelectedLocation(location);
-                          setSelectedCurrentPhotoIndex(0);
-                        }}
-                        className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all text-left"
-                      >
-                        <div className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
-                          {location.photos && location.photos.length > 0 ? (
-                            <img
-                              src={
-                                location.photos[0]?.url || location.photos[0]
-                              }
-                              alt={location.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Home className="h-6 w-6 text-gray-400" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-gray-900 truncate">
-                            {location.name}
-                          </h4>
-                          <p className="text-sm text-gray-600 truncate">
-                            {location.city && location.state
-                              ? `${location.city}, ${location.state}`
-                              : getFullAddress(location)}
-                          </p>
-                          {location.propertyType && (
-                            <span className="inline-block mt-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-medium">
-                              {location.propertyType}
-                            </span>
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
             )}
 
