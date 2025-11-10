@@ -140,80 +140,95 @@ const LocationDirectory = () => {
     return parts.join(", ");
   };
 
-  useEffect(() => {
-    if (!mapsApiKey || viewMode !== "map" || !mapRef.current) return;
+  const [locationCoords, setLocationCoords] = useState({}); 
+  const [setReloadMapTrigger] = useState(0);
 
-    const initMap = async () => {
-      if (!window.google) {
-        const script = document.createElement("script");
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}`;
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
 
-        await new Promise((resolve) => {
-          script.onload = resolve;
-        });
-      }
+useEffect(() => {
+  if (!mapsApiKey || viewMode !== "map" || !mapRef.current) return;
 
-      markersRef.current.forEach((marker) => marker.setMap(null));
-      markersRef.current = [];
+  let isMounted = true;
 
-      const center =
-        filteredLocations.length > 0 && filteredLocations[0].city
-          ? { lat: 41.8, lng: -74.0 }
-          : { lat: 39.8283, lng: -98.5795 };
+  const initMap = async () => {
+    // Load Google Maps script if not loaded
+    if (!window.google) {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
 
-      if (!googleMapRef.current) {
-        googleMapRef.current = new window.google.maps.Map(mapRef.current, {
-          zoom: 8,
-          center: center,
-        });
-      }
+      await new Promise((resolve) => (script.onload = resolve));
+    }
 
-      const bounds = new window.google.maps.LatLngBounds();
-      const geocoder = new window.google.maps.Geocoder();
+    if (!isMounted) return;
 
-      for (const location of filteredLocations) {
-        const address = getFullAddress(location);
-        if (!address) continue;
+    // Remove old markers
+    markersRef.current.forEach((marker) => marker.setMap(null));
+    markersRef.current = [];
 
+    // Create new map instance
+    googleMapRef.current = new window.google.maps.Map(mapRef.current, {
+      zoom: 8,
+      center: { lat: 41.8, lng: -74.0 }, // default center
+    });
+
+    const bounds = new window.google.maps.LatLngBounds();
+    const geocoder = new window.google.maps.Geocoder();
+
+    for (const location of filteredLocations) {
+      // Use cached coordinates if available
+      let coords = locationCoords[location.id];
+      if (!coords) {
         try {
           const result = await new Promise((resolve, reject) => {
-            geocoder.geocode({ address: address }, (results, status) => {
-              if (status === "OK") {
-                resolve(results[0]);
-              } else {
-                reject(status);
+            geocoder.geocode(
+              { address: getFullAddress(location) },
+              (results, status) => {
+                if (status === "OK") resolve(results[0]);
+                else reject(status);
               }
-            });
+            );
           });
-
-          const marker = new window.google.maps.Marker({
-            position: result.geometry.location,
-            map: googleMapRef.current,
-            title: location.name,
-            animation: window.google.maps.Animation.DROP,
-          });
-
-          marker.addListener("click", () => {
-            setHoveredLocation(location); 
-          });
-
-          markersRef.current.push(marker);
-          bounds.extend(result.geometry.location);
+          coords = {
+            lat: result.geometry.location.lat(),
+            lng: result.geometry.location.lng(),
+          };
+          // Save to cache
+          setLocationCoords((prev) => ({ ...prev, [location.id]: coords }));
         } catch (err) {
-          console.error(`Failed to geocode ${address}:`, err);
+          console.error(`Failed to geocode ${location.name}:`, err);
+          continue;
         }
       }
 
-      if (markersRef.current.length > 0) {
-        googleMapRef.current.fitBounds(bounds);
-      }
-    };
+      const marker = new window.google.maps.Marker({
+        position: coords,
+        map: googleMapRef.current,
+        title: location.name,
+        animation: window.google.maps.Animation.DROP,
+      });
 
-    initMap();
-  }, [mapsApiKey, viewMode, filteredLocations]);
+      marker.addListener("click", () => setHoveredLocation(location));
+      markersRef.current.push(marker);
+      bounds.extend(coords);
+    }
+
+    if (markersRef.current.length > 0) {
+      googleMapRef.current.fitBounds(bounds);
+    }
+  };
+
+  initMap();
+
+  return () => {
+    isMounted = false;
+    // Clean up markers and map
+    markersRef.current.forEach((marker) => marker.setMap(null));
+    markersRef.current = [];
+    googleMapRef.current = null;
+  };
+}, [mapsApiKey, viewMode, filteredLocations, locationCoords]);
 
   if (loading) {
     return (
@@ -243,6 +258,9 @@ const LocationDirectory = () => {
               onClick={() => {
                 setSelectedLocation(null);
                 setSelectedCurrentPhotoIndex(0);
+                if (viewMode === "map") {
+                  setReloadMapTrigger((prev) => prev + 1); // only reload map if we're in map view
+                }
               }}
             >
               <ArrowLeft className="h-4 w-4" />
