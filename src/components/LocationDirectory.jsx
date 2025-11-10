@@ -442,9 +442,6 @@ const LocationDirectory = () => {
                             title="Location Map"
                           />
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                          Cannot display map view
-                        </p>
                       </div>
                     </div>
                   )}
