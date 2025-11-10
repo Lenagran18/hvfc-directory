@@ -473,7 +473,7 @@ useEffect(() => {
 
   // Main Directory View
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white-50">
       <div className="max-w-7xl mx-auto p-6">
         {/* Search bar */}
         <div className="mb-6 flex gap-3">
