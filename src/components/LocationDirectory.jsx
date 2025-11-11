@@ -113,7 +113,7 @@ const LocationDirectory = () => {
 
       const matchesPropertyType =
         selectedPropertyTypes.length === 0 ||
-        selectedPropertyTypes.includes(location.propertyType);  
+        selectedPropertyTypes.includes(location.propertyType);
       return matchesSearch && matchesPropertyType;
     });
   }, [locations, searchTerm, selectedPropertyTypes]);
@@ -140,95 +140,106 @@ const LocationDirectory = () => {
     return parts.join(", ");
   };
 
-  const [locationCoords, setLocationCoords] = useState({}); 
+  const [locationCoords, setLocationCoords] = useState({});
   const [setReloadMapTrigger] = useState(0);
+  const [mapLoading, setMapLoading] = useState(false);
 
+  useEffect(() => {
+    if (!mapsApiKey || viewMode !== "map" || !mapRef.current) return;
 
-useEffect(() => {
-  if (!mapsApiKey || viewMode !== "map" || !mapRef.current) return;
+    setMapLoading(true);
+    let isMounted = true;
 
-  let isMounted = true;
+    const loadScript = () => {
+      return new Promise((resolve) => {
+        if (window.google) {
+          resolve();
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}`;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => resolve();
+        document.head.appendChild(script);
+      });
+    };
 
-  const initMap = async () => {
-    // Load Google Maps script if not loaded
-    if (!window.google) {
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}`;
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
+    const initMap = async () => {
+      await loadScript();
+      if (!isMounted) return;
+      // Only create map if it doesn't exist yet
+      if (!googleMapRef.current) {
+        googleMapRef.current = new window.google.maps.Map(mapRef.current, {
+          zoom: 8,
+          center: { lat: 41.8, lng: -74.0 },
+        });
+      }
+      setMapLoading(false);
+    };
 
-      await new Promise((resolve) => (script.onload = resolve));
-    }
+    initMap();
 
-    if (!isMounted) return;
+    return () => {
+      isMounted = false;
+      setMapLoading(false);
+      // Clean up markers and map
+    };
+  }, [mapsApiKey, viewMode]);
+
+  // Update markers separately when filteredLocations or locationCoords change
+  useEffect(() => {
+    if (!googleMapRef.current || viewMode !== "map") return;
 
     // Remove old markers
     markersRef.current.forEach((marker) => marker.setMap(null));
     markersRef.current = [];
 
-    // Create new map instance
-    googleMapRef.current = new window.google.maps.Map(mapRef.current, {
-      zoom: 8,
-      center: { lat: 41.8, lng: -74.0 }, // default center
-    });
-
     const bounds = new window.google.maps.LatLngBounds();
     const geocoder = new window.google.maps.Geocoder();
 
-    for (const location of filteredLocations) {
-      // Use cached coordinates if available
-      let coords = locationCoords[location.id];
-      if (!coords) {
-        try {
-          const result = await new Promise((resolve, reject) => {
-            geocoder.geocode(
-              { address: getFullAddress(location) },
-              (results, status) => {
-                if (status === "OK") resolve(results[0]);
-                else reject(status);
-              }
-            );
-          });
-          coords = {
-            lat: result.geometry.location.lat(),
-            lng: result.geometry.location.lng(),
-          };
-          // Save to cache
-          setLocationCoords((prev) => ({ ...prev, [location.id]: coords }));
-        } catch (err) {
-          console.error(`Failed to geocode ${location.name}:`, err);
-          continue;
+    const addMarkers = async () => {
+      for (const location of filteredLocations) {
+        let coords = locationCoords[location.id];
+        if (!coords) {
+          try {
+            const result = await new Promise((resolve, reject) => {
+              geocoder.geocode(
+                { address: getFullAddress(location) },
+                (results, status) => {
+                  if (status === "OK") resolve(results[0]);
+                  else reject(status);
+                }
+              );
+            });
+            coords = {
+              lat: result.geometry.location.lat(),
+              lng: result.geometry.location.lng(),
+            };
+            setLocationCoords((prev) => ({ ...prev, [location.id]: coords }));
+          } catch (err) {
+            console.error(`Failed to geocode ${location.name}:`, err);
+            continue;
+          }
         }
+        const marker = new window.google.maps.Marker({
+          position: coords,
+          map: googleMapRef.current,
+          title: location.name,
+          animation: window.google.maps.Animation.DROP,
+        });
+
+        marker.addListener("click", () => setHoveredLocation(location));
+        markersRef.current.push(marker);
+        bounds.extend(coords);
       }
+      if (markersRef.current.length > 0) {
+        googleMapRef.current.fitBounds(bounds);
+      }
+    };
 
-      const marker = new window.google.maps.Marker({
-        position: coords,
-        map: googleMapRef.current,
-        title: location.name,
-        animation: window.google.maps.Animation.DROP,
-      });
-
-      marker.addListener("click", () => setHoveredLocation(location));
-      markersRef.current.push(marker);
-      bounds.extend(coords);
-    }
-
-    if (markersRef.current.length > 0) {
-      googleMapRef.current.fitBounds(bounds);
-    }
-  };
-
-  initMap();
-
-  return () => {
-    isMounted = false;
-    // Clean up markers and map
-    markersRef.current.forEach((marker) => marker.setMap(null));
-    markersRef.current = [];
-    googleMapRef.current = null;
-  };
-}, [mapsApiKey, viewMode, filteredLocations, locationCoords]);
+    addMarkers();
+  }, [filteredLocations, locationCoords, viewMode]);
 
   if (loading) {
     return (
@@ -610,6 +621,11 @@ useEffect(() => {
             {/* Map View */}
             {viewMode === "map" && mapsApiKey && (
               <div className="relative h-[600px]">
+                {mapLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-20">
+                    <div className="text-gray-600">Loading map...</div>
+                  </div>
+                )}
                 <div ref={mapRef} className="absolute inset-0" />
 
                 {/* Card Overlay */}
