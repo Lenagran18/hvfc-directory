@@ -233,6 +233,7 @@ const LocationDirectory = () => {
         markersRef.current.push(marker);
         bounds.extend(coords);
       }
+
       if (markersRef.current.length > 0) {
         googleMapRef.current.fitBounds(bounds);
       }
