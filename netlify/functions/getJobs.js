@@ -1,0 +1,41 @@
+const axios = require('axios');
+
+exports.handler = async (event, context) => {
+  // Set CORS headers
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+  };
+
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
+  }
+
+  try {
+    const token = process.env.JOB_BOARD_AIRTABLE_API;
+    const baseId = process.env.JOB_BOARD_AIRTABLE_BASE_ID;
+    const tableName = process.env.JOB_BOARD_AIRTABLE_TABLE_NAME;
+
+    const response = await axios.get(
+      `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName || '')}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(response.data)
+    };
+  } catch (error) {
+    return {
+      statusCode: error.response?.status || 500,
+      headers,
+      body: JSON.stringify({ error: error.message })
+    };
+  }
+};
