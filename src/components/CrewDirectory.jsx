@@ -1,7 +1,25 @@
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
-import { Search, Filter, X, MapPin, Mail, Phone, ArrowLeft, Users, ExternalLink } from "lucide-react";
+import {
+  Search,
+  Filter,
+  X,
+  MapPin,
+  Mail,
+  Phone,
+  ArrowLeft,
+  Users,
+  ExternalLink,
+} from "lucide-react";
 import { useOutsetaAuth } from "../hooks/useOutsetaAuth";
+
+// Helper function to create URL-friendly slugs
+const createSlug = (name) => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+};
 
 const CrewDirectory = () => {
   const { isAuthenticated, loading: authLoading, user } = useOutsetaAuth();
@@ -13,14 +31,34 @@ const CrewDirectory = () => {
     console.log("Auth Status:", { isAuthenticated, authLoading, user });
   }, [isAuthenticated, authLoading, user]);
 
+  // Handle hash-based routing
   useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1); // Remove the '#'
+      if (hash) {
+        const member = crewMembers.find((m) => createSlug(m.name) === hash);
+        if (member) {
+          setSelectedMember(member);
+        }
+      } else {
+        setSelectedMember(null);
+      }
+    };
 
+    // Check hash on initial load and when it changes
+    handleHashChange();
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, [crewMembers]);
+
+  useEffect(() => {
     if (authLoading) return; // Wait for auth to load
 
     // Fetch airtable data
     const fetchCrewMembers = async () => {
       try {
-       const response = await axios.get("/.netlify/functions/getMembers");
+        const response = await axios.get("/.netlify/functions/getMembers");
         // Transform Airtable records to hvfc format
         const transformedData = response.data.records.map((record) => ({
           id: record.id,
@@ -48,7 +86,7 @@ const CrewDirectory = () => {
 
     fetchCrewMembers();
   }, [authLoading, isAuthenticated]);
-  
+
   const [selectedMember, setSelectedMember] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -58,7 +96,7 @@ const CrewDirectory = () => {
     {
       name: "Production",
       roles: ["Producers", "UPMs", "Production Coordinators", "Secretaries"],
-    }, 
+    },
     {
       name: "Assistant Directors",
       roles: ["1st ADs", "2nd ADs", "2nd 2nd ADs"],
@@ -174,7 +212,24 @@ const CrewDirectory = () => {
     setSelectedSpecialties([]);
   };
 
-  if (loading|| authLoading) {
+  // Handle member selection with hash
+  const handleMemberClick = (member) => {
+    const slug = createSlug(member.name);
+    window.location.hash = slug;
+    // setSelectedMember is handled by the hashchange listener
+  };
+
+  // Handle back to directory
+  const handleBackToDirectory = () => {
+    window.history.pushState(
+      null,
+      "",
+      window.location.pathname + window.location.search
+    );
+    setSelectedMember(null);
+  };
+
+  if (loading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-600">
         Loading...
@@ -199,7 +254,7 @@ const CrewDirectory = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <button
               className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              onClick={() => setSelectedMember(null)}
+              onClick={handleBackToDirectory}
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Directory
@@ -303,8 +358,9 @@ const CrewDirectory = () => {
                                 <Mail className="h-4 w-4" />
                                 Email
                               </p>
-                              
-                                <a href={`mailto:${selectedMember.email}`}
+
+                              <a
+                                href={`mailto:${selectedMember.email}`}
                                 className="text-blue-600 hover:text-blue-700 text-sm"
                               >
                                 {selectedMember.email}
@@ -317,8 +373,9 @@ const CrewDirectory = () => {
                                 <Phone className="h-4 w-4" />
                                 Phone
                               </p>
-                              
-                                <a href={`tel:${selectedMember.phone}`}
+
+                              <a
+                                href={`tel:${selectedMember.phone}`}
                                 className="text-blue-600 hover:text-blue-700 text-sm"
                               >
                                 {selectedMember.phone}
@@ -358,8 +415,8 @@ const CrewDirectory = () => {
                     </div>
                     {/* Show "Become a Member" button only to non-members */}
                     {!isAuthenticated && (
-                    
-                        <a href="https://walrus-aqua-5zw3.squarespace.com/become-a-member"
+                      <a
+                        href="https://walrus-aqua-5zw3.squarespace.com/become-a-member"
                         target="_top"
                         className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
                       >
@@ -376,9 +433,10 @@ const CrewDirectory = () => {
                       <h3 className="text-lg font-semibold mb-3">Links</h3>
                       <div className="space-y-2">
                         <a
-                          href={selectedMember.website?.startsWith('http')
-                            ? selectedMember.website
-                            : `https://${selectedMember.website}`
+                          href={
+                            selectedMember.website?.startsWith("http")
+                              ? selectedMember.website
+                              : `https://${selectedMember.website}`
                           }
                           target="_blank"
                           rel="noopener noreferrer"
@@ -551,7 +609,7 @@ const CrewDirectory = () => {
               {filteredMembers.map((member) => (
                 <div
                   key={member.id}
-                  onClick={() => setSelectedMember(member)}
+                  onClick={() => handleMemberClick(member)}
                   className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
                 >
                   <img
