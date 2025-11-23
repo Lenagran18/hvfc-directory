@@ -8,6 +8,8 @@ import {
   ArrowLeft,
   ExternalLink,
   DollarSign,
+  Calendar,
+  Building,
 } from "lucide-react";
 import { useOutsetaAuth } from "../hooks/useOutsetaAuth";
 
@@ -155,6 +157,8 @@ const JobBoard = () => {
                               {selectedJob.location}
                             </div>
                           )}
+                        </div>
+                        <div className="flex items-center gap-4 text-gray-600 mt-2">
                           {selectedJob.rate && (
                             <div className="flex items-center gap-2">
                               <DollarSign className="h-4 w-4" />
@@ -289,41 +293,78 @@ const JobBoard = () => {
         </div>
 
         {/* Job List */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {filteredJobs.map((job) => (
             <div
               key={job.id}
               onClick={() => setSelectedJob(job)}
-              className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              className="cursor-pointer bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow"
             >
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-3">
+              <div className="p-8">
+                {/* Top Row */}
+                <div className="flex items-start justify-between mb-6 gap-4">
                   <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      {/* Posted Date Badge */}
+                      {job.postedDate && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-md text-sm border text-gray-500">
+                          {new Date(job.postedDate).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Job Title */}
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
                       {job.title}
                     </h3>
-                    <div className="flex items-center gap-2 text-gray-600 mb-2">
-                      <span className="font-medium">{job.company}</span>
+
+                    {/* Company */}
+                    <div className="flex items-center gap-2 text-gray-600 mb-1">
+                      <Building className="h-4 w-4 text-gray-400" />
+                      <span>{job.company || "Company not listed"}</span>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                      {job.location && (
-                        <div className="flex items-center gap-1">
-                          <MapPin size={16} />
-                          {job.location}
-                        </div>
-                      )}
-                      {job.rate && (
-                        <div className="flex items-center gap-1">
-                          <DollarSign size={16} />
-                          {job.rate}
-                        </div>
-                      )}
+
+                    {/* Location */}
+                    <div className="flex items-center gap-2 text-gray-600 mb-1">
+                      <MapPin className="h-4 w-4 text-gray-400" />
+                      <span>{job.location || "Location not listed"}</span>
                     </div>
+
+                    {/* Date Range */}
+                    {(job.startDate || job.endDate) && (
+                      <div className="flex items-center gap-2 text-gray-600 mb-1">
+                        <Calendar className="h-4 w-4 text-gray-400" />
+                        <span>
+                          {job.startDate || "?"} → {job.endDate || "?"}
+                        </span>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Right side rate */}
+                  {job.rate && (
+                    <div className="text-right shrink-0 text-gray-600">
+                      <div className="text-gray-500 mb-1">Rate</div>
+                      <div className="flex items-center justify-end gap-1 font-medium text-gray-600">
+                        <DollarSign className="h-4 w-4 text-gray-400" />
+                        <span>{job.rate}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <p className="text-gray-700 mb-4 line-clamp-2">
-                  {job.description}
-                </p>
+
+                {/* Divider */}
+                <div className="border-t my-4"></div>
+
+                {/* Description */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                    Description
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed line-clamp-2">
+                    {job.description || "No description provided."}
+                  </p>
+                </div>
 
                 {job.categories && job.categories.length > 0 && (
                   <div className="flex flex-wrap gap-2">
