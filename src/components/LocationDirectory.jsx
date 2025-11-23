@@ -40,18 +40,17 @@ const LocationDirectory = () => {
           .filter((record) => record.fields.Approved === true) // Only show approved locations
           .map((record) => ({
             id: record.id,
-            name: record.fields["Location name"] || "",
+            name: record.fields.LocationName || "",
             photos: record.fields.Photos || [],
             address: record.fields.Address || "",
             city: record.fields.City || "",
             state: record.fields.State || "",
-            country: record.fields.Country || "",
-            zipCode: record.fields["Zip code"] || "",
-            propertyOwner: record.fields["Property owner"] || "",
-            propertyType: record.fields["Property type"] || "",
-            notes: record.fields.Notes || "",
+            zipCode: record.fields.ZipCode|| "",
+            propertyOwner: record.fields.PropertyOwner || "",
+            propertyType: record.fields.PropertyType || "",
+            description: record.fields.Description || "",
             approved: record.fields.Approved || false,
-            approvedAt: record.fields["Approved at"] || "",
+            approvedAt: record.fields.ApprovedTime || "",
           }));
 
         setLocations(transformedData);
@@ -136,7 +135,7 @@ const LocationDirectory = () => {
       location.city,
       location.state,
       location.zipCode,
-      location.country,
+      "United States",
     ].filter(Boolean);
     return parts.join(", ");
   };
@@ -322,7 +321,6 @@ useEffect(() => {
               onClick={() => {
                 setSelectedLocation(null);
                 setSelectedCurrentPhotoIndex(0);
-           
               }}
             >
               <ArrowLeft className="h-4 w-4" />
@@ -463,14 +461,14 @@ useEffect(() => {
                         </div>
                       </div>
 
-                      {/* Notes */}
-                      {selectedLocation.notes && (
+                      {/* Description */}
+                      {selectedLocation.description && (
                         <div className="pt-4 border-t border-gray-200">
                           <h2 className="text-xl font-semibold mb-3">
                             Description
                           </h2>
                           <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                            {selectedLocation.notes}
+                            {selectedLocation.description}
                           </p>
                         </div>
                       )}
