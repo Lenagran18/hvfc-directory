@@ -96,8 +96,7 @@ const JobBoard = () => {
         job.company,
         job.location,
         job.description,
-        job.rate,
-        job.HiringContact,
+        job.rate
       ]
         .filter(Boolean) // Remove null/undefined values
         .join(" ")
@@ -315,7 +314,7 @@ const JobBoard = () => {
 
         {/* Job List */}
         <div className="space-y-6">
-          {filteredJobs.map((job) => (
+          {filteredJobs.filter(Boolean).map((job) => (
             <div
               key={job.id}
               onClick={() => setSelectedJob(job)}
@@ -356,8 +355,8 @@ const JobBoard = () => {
                       <div className="flex items-center gap-2 text-gray-600 mb-1">
                         <Calendar className="h-4 w-4 text-gray-400" />
                         {formatDateRange(
-                          selectedJob.startDate,
-                          selectedJob.endDate
+                          job.startDate,
+                          job.endDate
                         )}
                       </div>
                     )}
