@@ -14,7 +14,7 @@ exports.handler = async (event, context) => {
 
   try {
     const token = process.env.JOB_BOARD_AIRTABLE_API;
-    const baseId = process.env.JOB_BOARD_AIRTABLE_BASE_ID;
+    const baseId = process.env.AIRTABLE_BASE_ID;
     const tableName = process.env.JOB_BOARD_AIRTABLE_TABLE_NAME;
 
     const response = await axios.get(
