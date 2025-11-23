@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useOutsetaAuth } from "../hooks/useOutsetaAuth";
 
-//Helper function 
+//Helper functions
 function formatDateRange(start, end) {
   if (!start && !end) return "";
 
@@ -32,6 +32,19 @@ function formatDateRange(start, end) {
 
   // If only one date exists
   return startFormatted || endFormatted;
+}
+
+function daysAgo(dateString) {
+  if (!dateString) return "";
+  const posted = new Date(dateString);
+  const now = new Date();
+
+  const diffTime = now - posted; // difference in milliseconds
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); // convert to days
+
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "1 day ago";
+  return `${diffDays} days ago`;
 }
 
 const JobBoard = () => {
@@ -328,7 +341,7 @@ const JobBoard = () => {
                       {/* Posted Date Badge */}
                       {job.postedDate && (
                         <span className="inline-flex items-center px-3 py-1 rounded-md text-sm border text-gray-500">
-                          {new Date(job.postedDate).toLocaleDateString()}
+                          {daysAgo(job.postedDate)}
                         </span>
                       )}
                     </div>
