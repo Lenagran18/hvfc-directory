@@ -68,6 +68,7 @@ const CrewDirectory = () => {
             "https://via.placeholder.com/400",
           position: record.fields["Job Title"] || "",
           department: record.fields.Department || [],
+          role: record.fields.Role || "",
           specialties: record.fields.Specialties || [],
           county: record.fields.County || "",
           yearsInIndustry: record.fields.YearsInTheIndustry || "",
