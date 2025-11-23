@@ -354,21 +354,20 @@ const JobBoard = () => {
                     {(job.startDate || job.endDate) && (
                       <div className="flex items-center gap-2 text-gray-600 mb-1">
                         <Calendar className="h-4 w-4 text-gray-400" />
-                        {formatDateRange(
-                          job.startDate,
-                          job.endDate
-                        )}
+                        {formatDateRange(job.startDate, job.endDate)}
                       </div>
                     )}
                   </div>
 
                   {/* Right side rate */}
                   {job.rate && (
-                    <div className="text-right shrink-0 text-gray-600">
-                      <div className="text-gray-500 mb-1">Rate</div>
-                      <div className="flex items-center justify-end gap-1 font-medium text-gray-600">
+                    <div className="text-right shrink-0 text-gray-500">
+                      <div className="text-gray-500 mb-1 font-semibold">
+                        Rate
+                      </div>
+                      <div className="flex items-center justify-end gap-1 font-medium text-gray-500">
                         <DollarSign className="h-4 w-4 text-gray-400" />
-                        <span>{job.rate}</span>
+                        {job.rate}
                       </div>
                     </div>
                   )}
