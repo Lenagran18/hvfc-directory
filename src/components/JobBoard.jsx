@@ -29,13 +29,18 @@ const JobBoard = () => {
         const response = await axios.get("/.netlify/functions/getJobs");
         const transformedData = response.data.records.map((record) => ({
           id: record.id,
-          title: record.fields["Job Title"] || "",
-          company: record.fields["Company Name"] || "",
+          title: record.fields.Title || "",
+          company: record.fields.CompanyName || "",
           location: record.fields.Location || "",
           description: record.fields.Description || "",
-          pay: record.fields.Pay || "",
-          HiringContact: record.fields.contact || "",
-          hiringEmail: record.fields["Contact Email"] || "",
+          rate: record.fields.Rate || "",
+          startDate: record.fields.StartDate || "",
+          endDate: record.fields.EndDate || "",
+          Contact: record.fields.contact || "",
+          contactEmail: record.fields.ContactEmail || "",
+          contactPhone: record.fields.ContactPhone || "",
+          approved: record.fields.Approved || false,
+          approvedTime: record.fields.ApprovedTime || "",
           postedDate: record.fields.PostedDate || "",
         }));
 
@@ -68,7 +73,7 @@ const JobBoard = () => {
         job.company,
         job.location,
         job.description,
-        job.pay,
+        job.rate,
         job.HiringContact,
       ]
         .filter(Boolean) // Remove null/undefined values
@@ -150,10 +155,10 @@ const JobBoard = () => {
                               {selectedJob.location}
                             </div>
                           )}
-                          {selectedJob.pay && (
+                          {selectedJob.rate && (
                             <div className="flex items-center gap-2">
                               <DollarSign className="h-4 w-4" />
-                              {selectedJob.pay}
+                              {selectedJob.rate}
                             </div>
                           )}
                         </div>
@@ -307,10 +312,10 @@ const JobBoard = () => {
                           {job.location}
                         </div>
                       )}
-                      {job.pay && (
+                      {job.rate && (
                         <div className="flex items-center gap-1">
                           <DollarSign size={16} />
-                          {job.pay}
+                          {job.rate}
                         </div>
                       )}
                     </div>
