@@ -62,15 +62,20 @@ const CrewDirectory = () => {
         // Transform Airtable records to hvfc format
         const transformedData = response.data.records.map((record) => ({
           id: record.id,
-          name: record.fields.Name || "",
+          name: record.fields.FullName || "",
           photo:
-            record.fields.Photo?.[0]?.url || "https://via.placeholder.com/400",
-          position: record.fields.Position || "",
+            record.fields["Profile Photo"]?.[0]?.url ||
+            "https://via.placeholder.com/400",
+          position: record.fields["Job Title"] || "",
+          department: record.fields.Department || [],
           specialties: record.fields.Specialties || [],
+          county: record.fields.County || "",
+          yearsInIndustry: record.fields.YearsInTheIndustry || "",
+          unionAffiliation: record.fields.UnionAffiliation || "",
+          website: record.fields["Portfolio/IMDBLink"] || "",
           bio: record.fields.Bio || "",
           email: record.fields.Email || "",
           phone: record.fields.Phone || "",
-          website: record.fields.Website || "",
           location: record.fields.Location || "",
           //TO DO: add all fields from hvfc
         }));
