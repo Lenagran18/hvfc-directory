@@ -13,6 +13,27 @@ import {
 } from "lucide-react";
 import { useOutsetaAuth } from "../hooks/useOutsetaAuth";
 
+//Helper function 
+function formatDateRange(start, end) {
+  if (!start && !end) return "";
+
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  const startFormatted = start ? fmt.format(new Date(start)) : "";
+  const endFormatted = end ? fmt.format(new Date(end)) : "";
+
+  if (startFormatted && endFormatted) {
+    return `${startFormatted} - ${endFormatted}`;
+  }
+
+  // If only one date exists
+  return startFormatted || endFormatted;
+}
+
 const JobBoard = () => {
   const { isAuthenticated, loading: authLoading, user } = useOutsetaAuth();
   const [jobs, setJobs] = useState([]);
@@ -334,9 +355,10 @@ const JobBoard = () => {
                     {(job.startDate || job.endDate) && (
                       <div className="flex items-center gap-2 text-gray-600 mb-1">
                         <Calendar className="h-4 w-4 text-gray-400" />
-                        <span>
-                          {job.startDate || "?"} → {job.endDate || "?"}
-                        </span>
+                        {formatDateRange(
+                          selectedJob.startDate,
+                          selectedJob.endDate
+                        )}
                       </div>
                     )}
                   </div>
