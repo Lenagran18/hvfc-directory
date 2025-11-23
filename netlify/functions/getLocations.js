@@ -13,9 +13,9 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const token = process.env.LOCATIONS_AIRTABLE_API;
+    const token = process.env.LOCATION_AIRTABLE_API;
     const baseId = process.env.AIRTABLE_BASE_ID;
-    const tableName = process.env.LOCATIONS_AIRTABLE_TABLE_NAME;
+    const tableName = process.env.LOCATION_AIRTABLE_TABLE_NAME;
     const mapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
 
     const response = await axios.get(
