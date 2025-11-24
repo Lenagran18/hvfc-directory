@@ -132,7 +132,7 @@ const JobBoard = () => {
       }\n\nBest regards,\n${user?.FullName || ""}`
     );
 
-    window.location.href = `mailto:${job.hiringEmail}?subject=${emailSubject}&body=${emailBody}`;
+    window.location.href = `mailto:${job.contactEmail}?subject=${emailSubject}&body=${emailBody}`;
   };
 
   if (loading || authLoading) {
@@ -254,7 +254,7 @@ const JobBoard = () => {
                     </h3>
 
                     <div className="space-y-4">
-                      {selectedJob.hiringEmail && (
+                      {selectedJob.contactEmail && (
                         <button
                           onClick={() => handleApply(selectedJob)}
                           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
