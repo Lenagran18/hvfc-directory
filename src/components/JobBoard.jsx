@@ -173,33 +173,63 @@ const JobBoard = () => {
                 {/* Job details box */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                   <div className="p-8">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    {/* Top Row */}
+                    <div className="flex items-start justify-between mb-6 gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                          {/* Posted Date Badge */}
+                          {selectedJob.postedDate && (
+                            <span className="inline-flex items-center px-3 py-1 rounded-md text-sm border text-gray-500">
+                              {daysAgo(selectedJob.postedDate)}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Job Title */}
+                        <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                           {selectedJob.title}
-                        </h1>
-                        <div className="flex items-center gap-2 text-gray-600 mb-2">
-                          <span className="text-lg font-medium">
-                            {selectedJob.company}
+                        </h3>
+
+                        {/* Company */}
+                        <div className="flex items-center gap-2 text-gray-600 mb-1">
+                          <Building className="h-4 w-4 text-gray-400" />
+                          <span>
+                            {selectedJob.company || "Company not listed"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-4 text-gray-600">
-                          {selectedJob.location && (
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4" />
-                              {selectedJob.location}
-                            </div>
-                          )}
+
+                        {/* Location */}
+                        <div className="flex items-center gap-2 text-gray-600 mb-1">
+                          <MapPin className="h-4 w-4 text-gray-400" />
+                          <span>
+                            {selectedJob.location || "Location not listed"}
+                          </span>
                         </div>
-                        <div className="flex items-center gap-4 text-gray-600 mt-2">
-                          {selectedJob.rate && (
-                            <div className="flex items-center gap-2">
-                              <DollarSign className="h-4 w-4" />
-                              {selectedJob.rate}
-                            </div>
-                          )}
-                        </div>
+
+                        {/* Date Range */}
+                        {(selectedJob.startDate || selectedJob.endDate) && (
+                          <div className="flex items-center gap-2 text-gray-600 mb-1">
+                            <Calendar className="h-4 w-4 text-gray-400" />
+                            {formatDateRange(
+                              selectedJob.startDate,
+                              selectedJob.endDate
+                            )}
+                          </div>
+                        )}
                       </div>
+
+                      {/* Right side rate */}
+                      {selectedJob.rate && (
+                        <div className="text-right shrink-0 text-gray-500">
+                          <div className="text-gray-500 mb-1 font-semibold">
+                            Rate
+                          </div>
+                          <div className="flex items-center justify-end gap-1 font-medium text-gray-500">
+                            <DollarSign className="h-4 w-4 text-gray-400" />
+                            {selectedJob.rate}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
