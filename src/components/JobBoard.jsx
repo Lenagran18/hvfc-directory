@@ -6,7 +6,6 @@ import {
   MapPin,
   Mail,
   ArrowLeft,
-  ExternalLink,
   DollarSign,
   Calendar,
   Building,
@@ -171,6 +170,7 @@ const JobBoard = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
+                {/* Job details box */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                   <div className="p-8">
                     <div className="flex items-start justify-between mb-4">
@@ -203,7 +203,7 @@ const JobBoard = () => {
                     </div>
                   </div>
                 </div>
-
+                {/* Job description box */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                   <div className="p-6">
                     <h2 className="text-2xl font-semibold mb-4">
@@ -214,29 +214,8 @@ const JobBoard = () => {
                     </div>
                   </div>
                 </div>
-
-                {selectedJob.categories &&
-                  selectedJob.categories.length > 0 && (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                      <div className="p-6">
-                        <h2 className="text-2xl font-semibold mb-4">
-                          Categories
-                        </h2>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedJob.categories.map((category, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center px-3 py-1 rounded text-sm font-medium bg-slate-100 text-slate-900"
-                            >
-                              {category}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
               </div>
-
+              {/* Apply for position */}
               <div className="space-y-6">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                   <div className="p-6">
@@ -254,38 +233,9 @@ const JobBoard = () => {
                           Apply for Job
                         </button>
                       )}
-                      {selectedJob.externalUrl && (
-                        <a
-                          href={selectedJob.externalUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                          Apply on Company Site
-                        </a>
-                      )}
                     </div>
                   </div>
                 </div>
-
-                {selectedJob.postedDate && (
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                    <div className="p-6">
-                      <h3 className="text-lg font-semibold mb-3">
-                        Job Details
-                      </h3>
-                      <div className="text-sm text-gray-600">
-                        <p>
-                          Posted:{" "}
-                          {new Date(
-                            selectedJob.postedDate
-                          ).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -398,24 +348,6 @@ const JobBoard = () => {
                     {job.description || "No description provided."}
                   </p>
                 </div>
-
-                {job.categories && job.categories.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {job.categories.slice(0, 3).map((cat, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
-                      >
-                        {cat}
-                      </span>
-                    ))}
-                    {job.categories.length > 3 && (
-                      <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                        +{job.categories.length - 3} more
-                      </span>
-                    )}
-                  </div>
-                )}
               </div>
             </div>
           ))}
