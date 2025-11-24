@@ -104,16 +104,38 @@ const LocationDirectory = () => {
   // Show locations based on search
   const filteredLocations = useMemo(() => {
     return locations.filter((location) => {
-      const matchesSearch =
-        location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        location.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        location.state?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        location.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        location.propertyType.toLowerCase().includes(searchTerm.toLowerCase());
+      // Normalize property type: handle both array and single string cases
+      const locationTypes = Array.isArray(location.propertyType)
+        ? location.propertyType.map((t) => t.toLowerCase())
+        : [location.propertyType?.toLowerCase() || ""];
 
+      // Filter matches any selected property type (case-insensitive)
       const matchesPropertyType =
         selectedPropertyTypes.length === 0 ||
-        selectedPropertyTypes.includes(location.propertyType);
+        selectedPropertyTypes.some((type) =>
+          locationTypes.includes(type.toLowerCase())
+        );
+
+      // Collate search fields (name, city, state, address, ALL property types)
+      const fieldsToSearch = [
+        location.name,
+        location.city,
+        location.state,
+        location.address,
+        ...(Array.isArray(location.propertyType)
+          ? location.propertyType
+          : [location.propertyType]),
+      ]
+        .filter(Boolean)
+        .map((field) => field.toLowerCase());
+
+      // Search matches if any field contains the term
+      const matchesSearch =
+        searchTerm === "" ||
+        fieldsToSearch.some((field) =>
+          field.includes(searchTerm.toLowerCase())
+        );
+
       return matchesSearch && matchesPropertyType;
     });
   }, [locations, searchTerm, selectedPropertyTypes]);
