@@ -10,6 +10,10 @@ import {
   ArrowLeft,
   Users,
   ExternalLink,
+  Briefcase,
+  Calendar,
+  Star,
+  Building,
 } from "lucide-react";
 import { useOutsetaAuth } from "../hooks/useOutsetaAuth";
 
@@ -66,10 +70,10 @@ const CrewDirectory = () => {
           photo:
             record.fields["Profile Photo"]?.[0]?.url ||
             "https://via.placeholder.com/400",
-          position: record.fields["Job Title"] || "",
-          department: record.fields.Department || [],
-          role: record.fields.Role || "",
-          specialties: record.fields.Specialties || [],
+          jobTitle: record.fields["Job Title"] || "",
+          department: record.fields.Department
+            ? [record.fields.Department]
+            : [], // TO DO: might need to change depending on input
           county: record.fields.County || "",
           yearsInIndustry: record.fields.YearsInTheIndustry || "",
           unionAffiliation: record.fields.UnionAffiliation || "",
@@ -78,7 +82,6 @@ const CrewDirectory = () => {
           email: record.fields.Email || "",
           phone: record.fields.Phone || "",
           location: record.fields.Location || "",
-          //TO DO: add all fields from hvfc
         }));
 
         setCrewMembers(transformedData);
@@ -96,24 +99,26 @@ const CrewDirectory = () => {
   const [selectedMember, setSelectedMember] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilterPanel, setShowFilterPanel] = useState(false);
-  const [selectedSpecialties, setSelectedSpecialties] = useState([]);
+  const [selectedDepartments, setSelectedDepartments] = useState([]);
+  const [selectedJobTitles, setSelectedJobTitles] = useState([]);
   const [expandedCategories, setExpandedCategories] = useState({});
+
   const departmentCategories = [
     {
       name: "Production",
-      roles: ["Producers", "UPMs", "Production Coordinators", "Secretaries"],
+      jobTitles: ["Producers", "UPMs", "Production Coordinators", "Secretaries"],
     },
     {
       name: "Assistant Directors",
-      roles: ["1st ADs", "2nd ADs", "2nd 2nd ADs"],
+      jobTitles: ["1st ADs", "2nd ADs", "2nd 2nd ADs"],
     },
     {
       name: "Camera",
-      roles: ["DPs", "Operators", "ACs", "Still Photographers"],
+      jobTitles: ["DPs", "Operators", "ACs", "Still Photographers"],
     },
     {
       name: "Electric",
-      roles: [
+      jobTitles: [
         "Gaffers",
         "Best Person",
         "Genny Operators",
@@ -123,15 +128,15 @@ const CrewDirectory = () => {
     },
     {
       name: "Grip",
-      roles: ["Key Grips", "Dolly Grips", "Grips", "Riggers"],
+      jobTitles: ["Key Grips", "Dolly Grips", "Grips", "Riggers"],
     },
     {
       name: "Properties",
-      roles: ["Prop Masters", "Props", "Armorers", "Food Stylists"],
+      jobTitles: ["Prop Masters", "Props", "Armorers", "Food Stylists"],
     },
     {
       name: "Wardrobe/Costumes",
-      roles: [
+      jobTitles: [
         "Designer",
         "Assistant Designer",
         "Wardrobe Supervisor",
@@ -145,7 +150,7 @@ const CrewDirectory = () => {
     },
     {
       name: "Art Department",
-      roles: [
+      jobTitles: [
         "Production Designers",
         "Art Directors",
         "Set Dressing",
@@ -154,49 +159,60 @@ const CrewDirectory = () => {
     },
     {
       name: "Locations",
-      roles: ["Managers", "Assistant Managers", "Scouts"],
+      jobTitles: ["Managers", "Assistant Managers", "Scouts"],
     },
     {
       name: "Transportation Department",
-      roles: ["Captain", "Drivers"],
+      jobTitles: ["Captain", "Drivers"],
     },
     {
       name: "Hair & Make-Up",
-      roles: ["Department Heads", "Keys"],
+      jobTitles: ["Department Heads", "Keys"],
     },
     {
       name: "Production Assistants",
-      roles: [],
+      jobTitles: [],
     },
     {
       name: "Casting",
-      roles: ["Agencies & Directors"],
+      jobTitles: ["Agencies & Directors"],
     },
     {
       name: "Accounting",
-      roles: ["Accountants", "Payroll"],
+      jobTitles: ["Accountants", "Payroll"],
     },
     {
       name: "Post-Production",
-      roles: ["Editors", "Colorists", "VFX", "Composers"],
+      jobTitles: ["Editors", "Colorists", "VFX", "Composers"],
     },
   ];
 
-  // Show members based on search
+  // Filter members based on search and filters
   const filteredMembers = useMemo(() => {
     return crewMembers.filter((member) => {
       const matchesSearch =
         member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.location.toLowerCase().includes(searchTerm.toLowerCase());
+        member.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (Array.isArray(member.department) &&
+          member.department.some((dept) =>
+            dept.toLowerCase().includes(searchTerm.toLowerCase())
+          ));
 
-      const matchesSpecialties =
-        selectedSpecialties.length === 0 ||
-        selectedSpecialties.some((spec) => member.specialties.includes(spec));
+      // Check if member's departments match selected departments
+      const matchesDepartments =
+        selectedDepartments.length === 0 ||
+        (Array.isArray(member.department) &&
+          selectedDepartments.some((dept) => member.department.includes(dept)));
 
-      return matchesSearch && matchesSpecialties;
+      // Check if member's job title matches selected job titles
+      const matchesJobTitles =
+        selectedJobTitles.length === 0 ||
+        (member.jobTitle && selectedJobTitles.includes(member.jobTitle));
+
+      return matchesSearch && matchesDepartments && matchesJobTitles;
     });
-  }, [crewMembers, searchTerm, selectedSpecialties]);
+  }, [crewMembers, searchTerm, selectedDepartments, selectedJobTitles]);
 
   const toggleCategory = (categoryName) => {
     setExpandedCategories((prev) => ({
@@ -205,24 +221,32 @@ const CrewDirectory = () => {
     }));
   };
 
-  const toggleSpecialty = (specialty) => {
-    setSelectedSpecialties((prev) =>
-      prev.includes(specialty)
-        ? prev.filter((s) => s !== specialty)
-        : [...prev, specialty]
+  const toggleDepartment = (department) => {
+    setSelectedDepartments((prev) =>
+      prev.includes(department)
+        ? prev.filter((d) => d !== department)
+        : [...prev, department]
+    );
+  };
+
+  const toggleJobTitle = (jobTitle) => {
+    setSelectedJobTitles((prev) =>
+      prev.includes(jobTitle)
+        ? prev.filter((j) => j !== jobTitle)
+        : [...prev, jobTitle]
     );
   };
 
   const clearFilters = () => {
     setSearchTerm("");
-    setSelectedSpecialties([]);
+    setSelectedDepartments([]);
+    setSelectedJobTitles([]);
   };
 
   // Handle member selection with hash
   const handleMemberClick = (member) => {
     const slug = createSlug(member.name);
     window.location.hash = slug;
-    // setSelectedMember is handled by the hashchange listener
   };
 
   // Handle back to directory
@@ -276,74 +300,81 @@ const CrewDirectory = () => {
                 {/* Member Profile Card */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                   <div className="p-8">
-                    <div className="flex flex-col md:flex-row gap-6">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-6">
                       <img
                         src={selectedMember.photo}
                         alt={selectedMember.name}
                         className="w-48 h-48 rounded-lg object-cover flex-shrink-0"
                       />
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h1 className="text-3xl font-bold text-gray-900">
-                            {selectedMember.name}
-                          </h1>
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-600 text-white">
-                            {selectedMember.position}
-                          </span>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                          {selectedMember.name}
+                        </h1>
+
+                        {/* Professional info under name */}
+                        <div className="space-y-2">
+                          {selectedMember.jobTitle && (
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <Briefcase className="h-4 w-4" />
+                              <span className="font-medium">
+                                {selectedMember.jobTitle}
+                              </span>
+                            </div>
+                          )}
+                          {selectedMember.department &&
+                            selectedMember.department.length > 0 && (
+                              <div className="flex items-center gap-2 text-gray-700">
+                                <Building className="h-4 w-4" />
+                                <div className="flex flex-wrap gap-1">
+                                  {selectedMember.department.map(
+                                    (dept, index) => (
+                                      <span key={index}>
+                                        {dept}
+                                        {index <
+                                        selectedMember.department.length - 1
+                                          ? ","
+                                          : ""}
+                                      </span>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          {selectedMember.yearsInIndustry && (
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <Calendar className="h-4 w-4" />
+                              <span>{selectedMember.yearsInIndustry}</span>
+                            </div>
+                          )}
+                          {selectedMember.unionAffiliation && (
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <Star className="h-4 w-4" />
+                              <span>{selectedMember.unionAffiliation}</span>
+                            </div>
+                          )}
+                          {selectedMember.county && (
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <MapPin className="h-4 w-4" />
+                              <span>{selectedMember.county} County</span>
+                            </div>
+                          )}
                         </div>
-                        {selectedMember.location && (
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <MapPin className="h-4 w-4" />
-                            {selectedMember.location}
-                          </div>
-                        )}
-                        <p className="text-slate-700 leading-relaxed mt-4">
-                          {selectedMember.bio || "No bio available."}
-                        </p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* TO DO: What info to show here? will need to replace texts */}
-                {/* About */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="p-6">
-                    <h2 className="text-2xl font-semibold mb-4">About</h2>
-                    <p className="text-slate-700 leading-relaxed">
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                      sed do eiusmod tempor incididunt ut labore et dolore magna
-                      aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                      ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                      Duis aute irure dolor in reprehenderit in voluptate velit
-                      esse cillum dolore eu fugiat nulla pariatur. Excepteur
-                      sint occaecat cupidatat non proident, sunt in culpa qui
-                      officia deserunt mollit anim id est laborum.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Skills & Specialties */}
-                {selectedMember.specialties &&
-                  selectedMember.specialties.length > 0 && (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                      <div className="p-6">
-                        <h2 className="text-2xl font-semibold mb-4">
-                          Skills & Specialties
-                        </h2>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedMember.specialties.map((skill, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center px-3 py-1 rounded text-sm font-medium bg-slate-100 text-slate-900"
-                            >
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+                {/* About / Bio */}
+                {selectedMember.bio && (
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div className="p-6">
+                      <h2 className="text-2xl font-semibold mb-4">About</h2>
+                      <p className="text-slate-700 leading-relaxed">
+                        {selectedMember.bio}
+                      </p>
                     </div>
-                  )}
+                  </div>
+                )}
               </div>
 
               {/* Sidebar */}
@@ -364,10 +395,9 @@ const CrewDirectory = () => {
                                 <Mail className="h-4 w-4" />
                                 Email
                               </p>
-
                               <a
                                 href={`mailto:${selectedMember.email}`}
-                                className="text-blue-600 hover:text-blue-700 text-sm"
+                                className="text-blue-600 hover:text-blue-700 text-sm break-all"
                               >
                                 {selectedMember.email}
                               </a>
@@ -379,7 +409,6 @@ const CrewDirectory = () => {
                                 <Phone className="h-4 w-4" />
                                 Phone
                               </p>
-
                               <a
                                 href={`tel:${selectedMember.phone}`}
                                 className="text-blue-600 hover:text-blue-700 text-sm"
@@ -473,7 +502,7 @@ const CrewDirectory = () => {
             <Search className="absolute left-3 top-3 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder="Search by name, position, or location..."
+              placeholder="Search by name, job title, department, or location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg"
@@ -490,24 +519,36 @@ const CrewDirectory = () => {
           >
             <Filter size={20} />
             Filters
-            {selectedSpecialties.length > 0 && (
+            {(selectedDepartments.length > 0 ||
+              selectedJobTitles.length > 0) && (
               <span className="bg-white text-blue-600 px-2 py-0.5 rounded-full text-xs font-bold">
-                {selectedSpecialties.length}
+                {selectedDepartments.length + selectedJobTitles.length}
               </span>
             )}
           </button>
         </div>
+
         {/* Selected Filters */}
-        {selectedSpecialties.length > 0 && (
+        {(selectedDepartments.length > 0 || selectedJobTitles.length > 0) && (
           <div className="mb-6 flex items-center gap-2 flex-wrap">
             <span className="text-sm text-gray-600">Active filters:</span>
-            {selectedSpecialties.map((spec, idx) => (
+            {selectedDepartments.map((dept, idx) => (
               <button
-                key={idx}
-                onClick={() => toggleSpecialty(spec)}
+                key={`dept-${idx}`}
+                onClick={() => toggleDepartment(dept)}
                 className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center gap-2 hover:bg-blue-200"
               >
-                {spec}
+                {dept}
+                <X size={14} />
+              </button>
+            ))}
+            {selectedJobTitles.map((title, idx) => (
+              <button
+                key={`title-${idx}`}
+                onClick={() => toggleJobTitle(title)}
+                className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm flex items-center gap-2 hover:bg-green-200"
+              >
+                {title}
                 <X size={14} />
               </button>
             ))}
@@ -527,7 +568,7 @@ const CrewDirectory = () => {
               <div className="bg-white rounded-lg shadow-sm p-6 sticky top-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-gray-900">
-                    Filter by Specialty
+                    Filter by Department & Job Title
                   </h2>
                   <button
                     onClick={() => setShowFilterPanel(false)}
@@ -547,9 +588,22 @@ const CrewDirectory = () => {
                         onClick={() => toggleCategory(category.name)}
                         className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 rounded px-2"
                       >
-                        <span className="font-medium text-gray-900">
-                          {category.name}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedDepartments.includes(
+                              category.name
+                            )}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              toggleDepartment(category.name);
+                            }}
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <span className="font-medium text-gray-900">
+                            {category.name}
+                          </span>
+                        </div>
                         <svg
                           className={`w-5 h-5 text-gray-500 transition-transform ${
                             expandedCategories[category.name]
@@ -568,21 +622,21 @@ const CrewDirectory = () => {
                       </button>
 
                       {expandedCategories[category.name] &&
-                        category.roles.length > 0 && (
+                        category.jobTitles.length > 0 && (
                           <div className="mt-2 ml-4 space-y-1">
-                            {category.roles.map((role, roleIdx) => (
+                            {category.jobTitles.map((title, titleIdx) => (
                               <label
-                                key={roleIdx}
+                                key={titleIdx}
                                 className="flex items-center py-1.5 px-2 hover:bg-gray-50 rounded cursor-pointer"
                               >
                                 <input
                                   type="checkbox"
-                                  checked={selectedSpecialties.includes(role)}
-                                  onChange={() => toggleSpecialty(role)}
+                                  checked={selectedJobTitles.includes(title)}
+                                  onChange={() => toggleJobTitle(title)}
                                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                 />
                                 <span className="ml-2 text-sm text-gray-700">
-                                  {role}
+                                  {title}
                                 </span>
                               </label>
                             ))}
@@ -590,9 +644,9 @@ const CrewDirectory = () => {
                         )}
 
                       {expandedCategories[category.name] &&
-                        category.roles.length === 0 && (
+                        category.jobTitles.length === 0 && (
                           <div className="mt-2 ml-4 text-sm text-gray-500 italic">
-                            No specific roles
+                            No specific job titles
                           </div>
                         )}
                     </div>
@@ -624,29 +678,57 @@ const CrewDirectory = () => {
                     className="w-full h-48 object-cover"
                   />
                   <div className="p-4">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                      {member.name}
-                    </h3>
-                    <p className="text-gray-600 mb-3">{member.position}</p>
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {member.specialties.slice(0, 2).map((spec, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"
-                        >
-                          {spec}
-                        </span>
-                      ))}
-                      {member.specialties.length > 2 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                          +{member.specialties.length - 2} more
-                        </span>
-                      )}
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                          {member.name}
+                        </h3>
+                        {member.jobTitle && (
+                          <p className="text-gray-600">{member.jobTitle}</p>
+                        )}
+                      </div>
+
+                      {/* Department tags on the right */}
+                      {Array.isArray(member.department) &&
+                        member.department.length > 0 && (
+                          <div className="flex flex-wrap gap-1 justify-end flex-shrink-0">
+                            {member.department.slice(0, 2).map((dept, idx) => (
+                              <span
+                                key={`dept-${idx}`}
+                                className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs whitespace-nowrap"
+                              >
+                                {dept}
+                              </span>
+                            ))}
+                            {member.department.length > 2 && (
+                              <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs whitespace-nowrap">
+                                +{member.department.length - 2} more
+                              </span>
+                            )}
+                          </div>
+                        )}
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <MapPin size={14} />
-                      {member.location}
+                    {/* Additional info */}
+                    <div className="space-y-1 text-sm text-gray-500">
+                      {member.county && (
+                        <div className="flex items-center gap-2">
+                          <MapPin size={14} />
+                          {member.county} County
+                        </div>
+                      )}
+                      {member.yearsInIndustry && (
+                        <div className="flex items-center gap-2">
+                          <Calendar size={14} />
+                          {member.yearsInIndustry}
+                        </div>
+                      )}
+                      {member.unionAffiliation && (
+                        <div className="flex items-center gap-2">
+                          <Star size={14} />
+                          {member.unionAffiliation}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
