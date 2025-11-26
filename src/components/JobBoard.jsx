@@ -395,7 +395,9 @@ const JobBoard = () => {
         {filteredJobs.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">
-              No jobs found matching your search.
+              {searchTerm.trim()
+                ? "No jobs found matching your search."
+                : "No jobs available."}
             </p>
           </div>
         )}
