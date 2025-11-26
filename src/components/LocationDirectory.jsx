@@ -837,7 +837,9 @@ useEffect(() => {
             {filteredLocations.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-gray-500 text-lg">
-                  No locations found matching your criteria.
+                  {searchTerm.trim()
+                    ? "No locations found matching your search."
+                    : "No locations available."}
                 </p>
               </div>
             )}
