@@ -62,22 +62,31 @@ const JobBoard = () => {
     const fetchJobs = async () => {
       try {
         const response = await axios.get("/.netlify/functions/getJobs");
-        const transformedData = response.data.records.map((record) => ({
-          id: record.id,
-          title: record.fields.Title || "",
-          company: record.fields.CompanyName || "",
-          location: record.fields.Location || "",
-          description: record.fields.Description || "",
-          rate: record.fields.Rate || "",
-          startDate: record.fields.StartDate || "",
-          endDate: record.fields.EndDate || "",
-          Contact: record.fields.contact || "",
-          contactEmail: record.fields.ContactEmail || "",
-          contactPhone: record.fields.ContactPhone || "",
-          approved: record.fields.Approved || false,
-          approvedTime: record.fields.ApprovedTime || "",
-          postedDate: record.fields.PostedDate || "",
-        }));
+        const today = new Date();
+
+        const transformedData = response.data.records
+          .filter((record) => {
+            const approved = record.fields.Approved === true; // Only show approved jobs
+            
+            const endDate = record.fields.EndDate ? new Date(record.fields.EndDate) : null;
+            return approved && endDate && endDate >= today;
+          })
+          .map((record) => ({
+            id: record.id,
+            title: record.fields.Title || "",
+            company: record.fields.CompanyName || "",
+            location: record.fields.Location || "",
+            description: record.fields.Description || "",
+            rate: record.fields.Rate || "",
+            startDate: record.fields.StartDate || "",
+            endDate: record.fields.EndDate || "",
+            Contact: record.fields.contact || "",
+            contactEmail: record.fields.ContactEmail || "",
+            contactPhone: record.fields.ContactPhone || "",
+            approved: record.fields.Approved || false,
+            approvedTime: record.fields.ApprovedTime || "",
+            postedDate: record.fields.PostedDate || "",
+          }));
 
         setJobs(transformedData);
         setLoading(false);
