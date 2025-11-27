@@ -665,7 +665,7 @@ const CrewDirectory = () => {
               {filteredMembers.length === 1 ? "member" : "members"}
             </div>
 
-            {/* Display data visually - member card view */}
+            {/* Member card view */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredMembers.map((member) => (
                 <div
@@ -679,35 +679,40 @@ const CrewDirectory = () => {
                     className="w-full h-48 object-cover"
                   />
                   <div className="p-4">
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                    <div className="mb-3">
+                      {/* Name and department tags in same flex container */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                        <h3 className="text-xl font-semibold text-gray-900 flex-shrink-0">
                           {member.name}
                         </h3>
-                        {member.jobTitle && (
-                          <p className="text-gray-600">{member.jobTitle}</p>
-                        )}
+
+                        {/* Department tag */}
+                        {Array.isArray(member.department) &&
+                          member.department.length > 0 && (
+                            <div className="flex flex-wrap gap-1 flex-shrink">
+                              {member.department
+                                .slice(0, 2)
+                                .map((dept, idx) => (
+                                  <span
+                                    key={`dept-${idx}`}
+                                    className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs whitespace-nowrap"
+                                  >
+                                    {dept}
+                                  </span>
+                                ))}
+                              {member.department.length > 2 && (
+                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs whitespace-nowrap">
+                                  +{member.department.length - 2} more
+                                </span>
+                              )}
+                            </div>
+                          )}
                       </div>
 
-                      {/* Department tags on the right */}
-                      {Array.isArray(member.department) &&
-                        member.department.length > 0 && (
-                          <div className="flex flex-wrap gap-1 justify-end flex-shrink-0">
-                            {member.department.slice(0, 2).map((dept, idx) => (
-                              <span
-                                key={`dept-${idx}`}
-                                className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs whitespace-nowrap"
-                              >
-                                {dept}
-                              </span>
-                            ))}
-                            {member.department.length > 2 && (
-                              <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs whitespace-nowrap">
-                                +{member.department.length - 2} more
-                              </span>
-                            )}
-                          </div>
-                        )}
+                      {/* Job title */}
+                      {member.jobTitle && (
+                        <p className="text-gray-600">{member.jobTitle}</p>
+                      )}
                     </div>
 
                     {/* Additional info */}
