@@ -70,7 +70,7 @@ const CrewDirectory = () => {
           photo:
             record.fields["Profile Photo"]?.[0]?.url ||
             "https://via.placeholder.com/400",
-          jobTitle: record.fields["Job Title"] || "",
+          jobTitle: record.fields["Job Title"] || [],
           department: record.fields.Department
             ? [record.fields.Department]
             : [], // TO DO: might need to change depending on input
@@ -208,7 +208,8 @@ const CrewDirectory = () => {
       // Check if member's job title matches selected job titles
       const matchesJobTitles =
         selectedJobTitles.length === 0 ||
-        (member.jobTitle && selectedJobTitles.includes(member.jobTitle));
+        (Array.isArray(member.jobTitle) &&
+          member.jobTitle.every((title) => selectedJobTitles.includes(title)));
 
       return matchesSearch && matchesDepartments && matchesJobTitles;
     });
