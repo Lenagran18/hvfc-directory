@@ -106,33 +106,33 @@ const CrewDirectory = () => {
   const departmentCategories = [
     {
       name: "Production",
-      jobTitles: ["Producers", "UPMs", "Production Coordinators", "Secretaries"],
+      jobTitles: ["Producer", "UPM", "Production Coordinator", "Secretarie"],
     },
     {
-      name: "Assistant Directors",
-      jobTitles: ["1st ADs", "2nd ADs", "2nd 2nd ADs"],
+      name: "Assistant Director",
+      jobTitles: ["1st AD", "2nd AD", "2nd 2nd AD"],
     },
     {
       name: "Camera",
-      jobTitles: ["DPs", "Operators", "ACs", "Still Photographers"],
+      jobTitles: ["DP", "Operator", "AC", "Still Photographer"],
     },
     {
       name: "Electric",
       jobTitles: [
-        "Gaffers",
+        "Gaffer",
         "Best Person",
-        "Genny Operators",
-        "Dimmer Ops",
-        "Electrics",
+        "Genny Operator",
+        "Dimmer Op",
+        "Electric",
       ],
     },
     {
       name: "Grip",
-      jobTitles: ["Key Grips", "Dolly Grips", "Grips", "Riggers"],
+      jobTitles: ["Key Grip", "Dolly Grip", "Grip", "Rigger"],
     },
     {
       name: "Properties",
-      jobTitles: ["Prop Masters", "Props", "Armorers", "Food Stylists"],
+      jobTitles: ["Prop Master", "Prop", "Armorer", "Food Stylist"],
     },
     {
       name: "Wardrobe/Costumes",
@@ -151,39 +151,39 @@ const CrewDirectory = () => {
     {
       name: "Art Department",
       jobTitles: [
-        "Production Designers",
-        "Art Directors",
+        "Production Designer",
+        "Art Director",
         "Set Dressing",
         "Scenics",
       ],
     },
     {
       name: "Locations",
-      jobTitles: ["Managers", "Assistant Managers", "Scouts"],
+      jobTitles: ["Manager", "Assistant Manager", "Scout"],
     },
     {
       name: "Transportation Department",
-      jobTitles: ["Captain", "Drivers"],
+      jobTitles: ["Captain", "Driver"],
     },
     {
       name: "Hair & Make-Up",
-      jobTitles: ["Department Heads", "Keys"],
+      jobTitles: ["Department Head", "Key"],
     },
     {
-      name: "Production Assistants",
+      name: "Production Assistant",
       jobTitles: [],
     },
     {
       name: "Casting",
-      jobTitles: ["Agencies & Directors"],
+      jobTitles: ["Agencies & Director"],
     },
     {
       name: "Accounting",
-      jobTitles: ["Accountants", "Payroll"],
+      jobTitles: ["Accountant", "Payroll"],
     },
     {
       name: "Post-Production",
-      jobTitles: ["Editors", "Colorists", "VFX", "Composers"],
+      jobTitles: ["Editor", "Colorist", "VFX", "Composer"],
     },
   ];
 
