@@ -340,11 +340,24 @@ const JobBoard = () => {
                         </span>
                       )}
                     </div>
-
-                    {/* Job Title */}
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {job.title}
-                    </h3>
+                    <div className="flex items-start justify-between">
+                      {/* Job Title */}
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        {job.title}
+                      </h3>
+                      {/* Right side rate */}
+                      {job.rate && (
+                        <div className="text-right shrink-0 -mt-3 text-gray-500">
+                          <div className="text-gray-500 mb-1 font-semibold">
+                            Rate
+                          </div>
+                          <div className="flex items-center justify-end gap-1 font-medium text-gray-500">
+                            <DollarSign className="h-4 w-4 text-gray-400" />
+                            {job.rate}
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
                     {/* Company */}
                     <div className="flex items-center gap-2 text-gray-600 mb-1">
@@ -366,19 +379,6 @@ const JobBoard = () => {
                       </div>
                     )}
                   </div>
-
-                  {/* Right side rate */}
-                  {job.rate && (
-                    <div className="text-right shrink-0 text-gray-500">
-                      <div className="text-gray-500 mb-1 font-semibold">
-                        Rate
-                      </div>
-                      <div className="flex items-center justify-end gap-1 font-medium text-gray-500">
-                        <DollarSign className="h-4 w-4 text-gray-400" />
-                        {job.rate}
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Divider */}
