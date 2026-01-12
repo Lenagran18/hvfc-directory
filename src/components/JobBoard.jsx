@@ -131,23 +131,12 @@ const JobBoard = () => {
     setSearchTerm("");
   };
 
-  const firstName = user?.FullName ? user.FullName.split(" ")[0].toLowerCase() : "";
-  const lastName = user?.FullName ? user.FullName.split(" ").slice(1).join(" ").toLowerCase() : "";
+  //const firstName = user?.FullName ? user.FullName.split(" ")[0].toLowerCase() : "";
+  //const lastName = user?.FullName ? user.FullName.split(" ").slice(1).join(" ").toLowerCase() : "";
 
   const handleApply = (job) => {
-    const emailSubject = encodeURIComponent(`Application for ${job.title}`);
-    const emailBody = encodeURIComponent(
-      `Hello,\n\nI am applying for the ${job.title} position at ${
-        job.company
-      }.\n\nMy Profile Information:\nName: ${user?.FullName || "N/A"}\nEmail: ${
-        user?.Email || "N/A"
-      }\n\nBest regards,\n${user?.FullName || ""}
-      \n\n User Profile Link: ${
-        window.location.origin
-      }/CrewDirectory#${firstName}-${lastName}`
-    );
-
-    window.location.href = `mailto:${job.contactEmail}?subject=${emailSubject}&body=${emailBody}`;
+    const airtableFormUrl = `https://airtable.com/appnUK2pdPioGv0xO/pagqVa9mmRR6PhGju/form?prefill_Job=${job.id}`;
+    window.open(airtableFormUrl, "_blank");
   };
 
   if (loading || authLoading) {
