@@ -565,11 +565,11 @@ const CrewDirectory = () => {
         <div className="flex gap-6">
           {/* Filter Panel */}
           {showFilterPanel && (
-            <div className="w-80 flex-shrink-0">
-              <div className="bg-white rounded-lg shadow-sm p-6 sticky top-6">
+            <div className="fixed inset-0 z-50 bg-white md:static md:w-80 md:flex-shrink-0">
+              <div className="h-full overflow-y-auto md:h-auto md:overflow-visible bg-white md:bg-transparent rounded-none md:rounded-lg shadow-none md:shadow-s p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-gray-900">
-                    Filter by Department & Job Title
+                    Filter by Department &amp; Job Title
                   </h2>
                   <button
                     onClick={() => setShowFilterPanel(false)}
@@ -579,7 +579,7 @@ const CrewDirectory = () => {
                   </button>
                 </div>
 
-                <div className="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto">
+                <div className="space-y-2 max-h-full md:max-h-[calc(100vh-200px)] overflow-y-auto">
                   {departmentCategories.map((category, catIdx) => (
                     <div
                       key={catIdx}
