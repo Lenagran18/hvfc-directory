@@ -657,8 +657,8 @@ useEffect(() => {
         <div className="flex gap-6">
           {/* Filter Panel */}
           {showFilterPanel && (
-            <div className="w-80 flex-shrink-0">
-              <div className="bg-white rounded-lg shadow-sm p-6 sticky top-6 border border-gray-200">
+            <div className="fixed inset-0 z-50 bg-white md:static md:w-80 md:flex-shrink-0">
+              <div className="h-full overflow-y-auto md:h-auto md:overflow-visible bg-white md:bg-transparent rounded-none md:rounded-lg shadow-none md:shadow-s p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-gray-900">
                     Filter by Property Type
