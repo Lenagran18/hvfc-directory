@@ -99,6 +99,10 @@ const LocationDirectory = () => {
     "Urban",
     "Vistas",
     "Water",
+    "College",
+    "Church",
+    "Parks",
+    "Yacht Clubs",
     "Other"
   ];
 
