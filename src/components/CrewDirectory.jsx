@@ -88,6 +88,7 @@ const CrewDirectory = () => {
           email: record.fields.Email || "",
           phone: record.fields.Phone || "",
           location: record.fields.Location || "",
+          status: record.fields.Status || "Inactive",
         }));
 
         setCrewMembers(transformedData);
@@ -197,6 +198,7 @@ const CrewDirectory = () => {
   const filteredMembers = useMemo(() => {
     const text = searchTerm.toLowerCase();
     return crewMembers.filter((member) => {
+      if (member.status !== "Active") return false;
       const matchesSearch =
         !searchTerm ||
         member.name.toLowerCase().includes(text) ||
