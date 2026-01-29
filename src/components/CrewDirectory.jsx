@@ -82,7 +82,7 @@ const CrewDirectory = () => {
           department: normalizeMulti(record.fields.Department),
           county: record.fields.County || "",
           yearsInIndustry: record.fields.YearsInTheIndustry || "",
-          unionAffiliation: record.fields.UnionAffiliation || "",
+          unionAffiliation: normalizeMulti(record.fields.UnionAffiliation),
           website: record.fields["Portfolio/IMDBLink"] || "",
           bio: record.fields.Bio || "",
           email: record.fields.Email || "",
@@ -366,10 +366,12 @@ const CrewDirectory = () => {
                               <span>{selectedMember.yearsInIndustry}</span>
                             </div>
                           )}
-                          {selectedMember.unionAffiliation && (
+                          {selectedMember.unionAffiliation?.length > 0 && (
                             <div className="flex items-center gap-2 text-gray-700">
                               <Star className="h-4 w-4" />
-                              <span>{selectedMember.unionAffiliation}</span>
+                              <span>
+                                {selectedMember.unionAffiliation.join(", ")}
+                              </span>
                             </div>
                           )}
                           {selectedMember.county && (
@@ -751,10 +753,10 @@ const CrewDirectory = () => {
                           {member.yearsInIndustry}
                         </div>
                       )}
-                      {member.unionAffiliation && (
+                      {member.unionAffiliation?.length > 0 && (
                         <div className="flex items-center gap-2">
                           <Star size={14} />
-                          {member.unionAffiliation}
+                          {member.unionAffiliation.join(", ")}
                         </div>
                       )}
                     </div>
