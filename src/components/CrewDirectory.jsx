@@ -70,7 +70,7 @@ const CrewDirectory = () => {
           photo:
             record.fields["Profile Photo"]?.[0]?.url ||
             "https://via.placeholder.com/400",
-          jobTitle: record.fields["Job Title"] || [],
+          jobTitle: record.fields.JobTitle || [],
           department: record.fields.Department
             ? [record.fields.Department]
             : [], // TO DO: might need to change depending on input
@@ -192,7 +192,10 @@ const CrewDirectory = () => {
     return crewMembers.filter((member) => {
       const matchesSearch =
         member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (Array.isArray(member.jobTitle) &&
+          member.jobTitle.some((title) =>
+            title.toLowerCase().includes(searchTerm.toLowerCase())
+          )) ||
         member.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (Array.isArray(member.department) &&
           member.department.some((dept) =>
@@ -314,14 +317,25 @@ const CrewDirectory = () => {
 
                         {/* Professional info under name */}
                         <div className="space-y-2">
-                          {selectedMember.jobTitle && (
-                            <div className="flex items-center gap-2 text-gray-700">
-                              <Briefcase className="h-4 w-4" />
-                              <span className="font-medium">
-                                {selectedMember.jobTitle}
-                              </span>
-                            </div>
-                          )}
+                          {selectedMember.jobTitle &&
+                            selectedMember.jobTitle.length > 0 && (
+                              <div className="flex items-center gap-2 text-gray-700">
+                                <Briefcase className="h-4 w-4" />
+                                <div className="flex flex-wrap gap-1">
+                                  {selectedMember.jobTitle.map(
+                                    (title, index) => (
+                                      <span key={index}>
+                                        {title}
+                                        {index <
+                                        selectedMember.jobTitle.length - 1
+                                          ? ","
+                                          : ""}
+                                      </span>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )}
                           {selectedMember.department &&
                             selectedMember.department.length > 0 && (
                               <div className="flex items-center gap-2 text-gray-700">
@@ -710,9 +724,12 @@ const CrewDirectory = () => {
                       </div>
 
                       {/* Job title */}
-                      {member.jobTitle && (
-                        <p className="text-gray-600">{member.jobTitle}</p>
-                      )}
+                      {Array.isArray(member.jobTitle) &&
+                        member.jobTitle.length > 0 && (
+                          <p className="text-gray-600">
+                            {member.jobTitle.join(", ")}
+                          </p>
+                        )}
                     </div>
 
                     {/* Additional info */}
