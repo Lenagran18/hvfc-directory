@@ -195,32 +195,31 @@ const CrewDirectory = () => {
 
   // Filter members based on search and filters
   const filteredMembers = useMemo(() => {
+    const text = searchTerm.toLowerCase();
     return crewMembers.filter((member) => {
       const matchesSearch =
-        member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (Array.isArray(member.jobTitle) &&
-          member.jobTitle.some((title) =>
-            title.toLowerCase().includes(searchTerm.toLowerCase())
-          )) ||
-        member.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (Array.isArray(member.department) &&
-          member.department.some((dept) =>
-            dept.toLowerCase().includes(searchTerm.toLowerCase())
-          ));
+        !searchTerm ||
+        member.name.toLowerCase().includes(text) ||
+        member.location.toLowerCase().includes(text) ||
+        member.jobTitle.some((title) => title.toLowerCase().includes(text)) ||
+        member.department.some((dept) => dept.toLowerCase().includes(text)) ||
+        member.unionAffiliation.some((u) => u.toLowerCase().includes(text));
 
-      // Check if member's departments match selected departments
-      const matchesDepartments =
-        selectedDepartments.length === 0 ||
-        (Array.isArray(member.department) &&
-          selectedDepartments.some((dept) => member.department.includes(dept)));
+      const nothingSelected =
+        selectedDepartments.length === 0 && selectedJobTitles.length === 0;
 
-      // Check if member's job title matches selected job titles
-      const matchesJobTitles =
-        selectedJobTitles.length === 0 ||
-        (Array.isArray(member.jobTitle) &&
-          member.jobTitle.every((title) => selectedJobTitles.includes(title)));
+      const matchesDepartment =
+        selectedDepartments.length > 0 &&
+        member.department.some((d) => selectedDepartments.includes(d));
 
-      return matchesSearch && matchesDepartments && matchesJobTitles;
+      const matchesJobTitle =
+        selectedJobTitles.length > 0 &&
+        member.jobTitle.some((t) => selectedJobTitles.includes(t));
+
+      const matchesFilters =
+        nothingSelected || matchesDepartment || matchesJobTitle;
+
+      return matchesSearch && matchesFilters;
     });
   }, [crewMembers, searchTerm, selectedDepartments, selectedJobTitles]);
 
