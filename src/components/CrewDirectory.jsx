@@ -31,6 +31,14 @@ const CrewDirectory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const normalizeMulti = (value) => {
+    if (!value) return [];
+    if (Array.isArray(value)) {
+      return value.flatMap((v) => v.split(",").map((s) => s.trim()));
+    }
+    return [value];
+  };
+
   useEffect(() => {
     console.log("Auth Status:", { isAuthenticated, authLoading, user });
   }, [isAuthenticated, authLoading, user]);
@@ -70,10 +78,8 @@ const CrewDirectory = () => {
           photo:
             record.fields["Profile Photo"]?.[0]?.url ||
             "https://via.placeholder.com/400",
-          jobTitle: record.fields.JobTitle || [],
-          department: record.fields.Department
-            ? [record.fields.Department]
-            : [], // TO DO: might need to change depending on input
+          jobTitle: normalizeMulti(record.fields.JobTitle),
+          department: normalizeMulti(record.fields.Department),
           county: record.fields.County || "",
           yearsInIndustry: record.fields.YearsInTheIndustry || "",
           unionAffiliation: record.fields.UnionAffiliation || "",
