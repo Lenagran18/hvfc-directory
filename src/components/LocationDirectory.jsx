@@ -463,7 +463,19 @@ useEffect(() => {
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">
                           {selectedLocation.name}
                         </h1>
-                        {selectedLocation.propertyType && (
+                        {selectedLocation.propertyType &&
+                        Array.isArray(selectedLocation.propertyType) ? (
+                          <div className="flex flex-wrap gap-1">
+                            {selectedLocation.propertyType.map((type, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-600 text-white"
+                              >
+                                {type}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-600 text-white">
                             {selectedLocation.propertyType}
                           </span>
@@ -757,11 +769,25 @@ useEffect(() => {
                           <h3 className="text-xl font-semibold text-gray-900 mb-1">
                             {hoveredLocation.name}
                           </h3>
-                          {hoveredLocation.propertyType && (
-                            <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium mb-2">
-                              {hoveredLocation.propertyType}
-                            </span>
-                          )}
+                          {hoveredLocation.propertyType &&
+                            (Array.isArray(hoveredLocation.propertyType) ? (
+                              <div className="flex flex-wrap gap-1 mb-2">
+                                {hoveredLocation.propertyType.map(
+                                  (type, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium"
+                                    >
+                                      {type}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            ) : (
+                              <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium mb-2">
+                                {hoveredLocation.propertyType}
+                              </span>
+                            ))}
                           <div className="flex items-start gap-2 text-sm text-gray-600 mb-3">
                             <MapPin
                               size={16}
@@ -816,11 +842,24 @@ useEffect(() => {
                       <h3 className="text-xl font-semibold text-gray-900 mb-1">
                         {location.name}
                       </h3>
-                      {location.propertyType && (
+                      {location.propertyType &&
+                      Array.isArray(location.propertyType) ? (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {location.propertyType.map((type, idx) => (
+                            <span
+                              key={idx}
+                              className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium"
+                            >
+                              {type}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
                         <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium mb-3">
                           {location.propertyType}
                         </span>
                       )}
+
                       <div className="flex items-start gap-2 text-sm text-gray-600">
                         <MapPin size={16} className="flex-shrink-0 mt-0.5" />
                         <span className="line-clamp-2">
