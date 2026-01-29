@@ -181,6 +181,18 @@ const CrewDirectory = () => {
       jobTitles: [],
     },
     {
+      name: "Actor",
+      jobTitles: ["Actor"],
+    },
+    {
+      name: "Background Actor",
+      jobTitles: ["Background Actor"],
+    },
+    {
+      name: "Intimacy Coordinator",
+      jobTitles: ["Intimacy Coordinator"],
+    },
+    {
       name: "Casting",
       jobTitles: ["Agencies & Director"],
     },
