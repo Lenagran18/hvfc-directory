@@ -281,7 +281,7 @@ useEffect(() => {
     markersRef.current = [];
     googleMapRef.current = null;
   };
-}, [mapsApiKey, viewMode, filteredLocations, locationCoords, mapsScriptLoaded]);
+}, [mapsApiKey, viewMode, filteredLocations, locationCoords, mapsScriptLoaded, selectedLocation]);
 
   useEffect(() => {
     if (
