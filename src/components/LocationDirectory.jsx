@@ -99,6 +99,7 @@ const LocationDirectory = () => {
     "Urban",
     "Vistas",
     "Water",
+    "Other"
   ];
 
   // Show locations based on search
