@@ -526,7 +526,7 @@ useEffect(() => {
                       Book This Location
                     </h3>
                     <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4">
-                      Interested in booking this location? Contact HVFC to
+                      Interested in booking this location? Contact Hudson Valley Film Commission to
                       inquire about availability and details.
                     </p>
                     <a
