@@ -342,10 +342,10 @@ useEffect(() => {
     return (
       <div className="min-h-screen bg-white">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
             <button
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors text-sm sm:text-base"
               onClick={() => {
                 setSelectedLocation(null);
                 setSelectedCurrentPhotoIndex(0);
@@ -358,10 +358,10 @@ useEffect(() => {
         </header>
 
         {/* Content */}
-        <section className="py-16 bg-white">
+        <section className="py-4 sm:py-8 lg:py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-8">
+            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+              <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
                 {/* Location card Photo */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                   {selectedLocation.photos &&
@@ -375,7 +375,7 @@ useEffect(() => {
                             selectedLocation.photos[selectedCurrentPhotoIndex]
                           }
                           alt={`${selectedLocation.name}`}
-                          className="w-full h-96 object-contain"
+                          className="w-full h-64 sm:h-80 lg:h-96 object-contain"
                         />
                         {selectedLocation.photos.length > 1 && (
                           <>
@@ -387,10 +387,10 @@ useEffect(() => {
                                     : prev - 1
                                 )
                               }
-                              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg"
+                              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 sm:p-2 rounded-full shadow-lg"
                             >
                               <svg
-                                className="w-6 h-6"
+                                className="w-5 h-5 sm:w-6 sm:h-6"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -412,10 +412,10 @@ useEffect(() => {
                                     : prev + 1
                                 )
                               }
-                              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg"
+                              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 sm:p-2 rounded-full shadow-lg"
                             >
                               <svg
-                                className="w-6 h-6"
+                                className="w-5 h-5 sm:w-6 sm:h-6"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -432,12 +432,12 @@ useEffect(() => {
                         )}
                       </div>
                       {selectedLocation.photos.length > 1 && (
-                        <div className="p-4 flex gap-2 overflow-x-auto">
+                        <div className="p-3 sm:p-4 flex gap-2 overflow-x-auto">
                           {selectedLocation.photos.map((photo, idx) => (
                             <button
                               key={idx}
                               onClick={() => setSelectedCurrentPhotoIndex(idx)}
-                              className={`flex-shrink-0 w-20 h-20 rounded border-2 overflow-hidden ${
+                              className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded border-2 overflow-hidden ${
                                 idx === selectedCurrentPhotoIndex
                                   ? "border-blue-600"
                                   : "border-gray-200"
@@ -454,18 +454,18 @@ useEffect(() => {
                       )}
                     </div>
                   ) : (
-                    <div className="h-96 flex items-center justify-center bg-gray-100">
-                      <ImageIcon className="h-16 w-16 text-gray-400" />
+                    <div className="h-64 sm:h-80 lg:h-96 flex items-center justify-center bg-gray-100">
+                      <ImageIcon className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400" />
                     </div>
                   )}
                 </div>
 
                 {/* Location Details */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="p-8">
+                  <div className="p-4 sm:p-6 lg:p-8">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                           {selectedLocation.name}
                         </h1>
                         {selectedLocation.propertyType &&
@@ -474,14 +474,14 @@ useEffect(() => {
                             {selectedLocation.propertyType.map((type, idx) => (
                               <span
                                 key={idx}
-                                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-600 text-white"
+                                className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-blue-600 text-white"
                               >
                                 {type}
                               </span>
                             ))}
                           </div>
                         ) : (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-600 text-white">
+                          <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-blue-600 text-white">
                             {selectedLocation.propertyType}
                           </span>
                         )}
@@ -493,7 +493,7 @@ useEffect(() => {
                       <div className="flex items-start gap-3">
                         <MapPin className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                         <div>
-                          <p className="text-gray-900">
+                          <p className="text-sm sm:text-base text-gray-900">
                             {selectedLocation.city && selectedLocation.state
                               ? `${selectedLocation.city}, ${selectedLocation.state}`
                               : "Address not available"}
@@ -504,10 +504,10 @@ useEffect(() => {
                       {/* Description */}
                       {selectedLocation.description && (
                         <div className="pt-4 border-t border-gray-200">
-                          <h2 className="text-xl font-semibold mb-3">
+                          <h2 className="text-lg sm:text-xl font-semibold mb-3">
                             Description
                           </h2>
-                          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                          <p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-wrap">
                             {selectedLocation.description}
                           </p>
                         </div>
@@ -518,20 +518,20 @@ useEffect(() => {
               </div>
 
               {/* Sidebar */}
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Contact to Book */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="p-6">
-                    <h3 className="text-lg font-semibold mb-4">
+                  <div className="p-4 sm:p-6 lg:p-8">
+                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
                       Book This Location
                     </h3>
-                    <p className="text-gray-600 text-sm mb-4">
+                    <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4">
                       Interested in booking this location? Contact HVFC to
                       inquire about availability and details.
                     </p>
                     <a
-                      href="mailto:HVFC@HVFC.org?subject=Location Inquiry: "
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                      href="mailto:info@hudsonvalleyfilmcommission.org?subject=Location Inquiry: "
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm sm:text-base"
                     >
                       <Mail className="h-4 w-4" />
                       Contact HVFC
@@ -565,8 +565,8 @@ useEffect(() => {
                   )} */}
                 {mapsApiKey && locationCoords[selectedLocation.id] && (
                   <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                    <div className="p-6">
-                      <h3 className="text-lg font-semibold mb-3">
+                    <div className="p-4 sm:p-6">
+                      <h3 className="text-base sm:text-lg font-semibold mb-3">
                         Location Map
                       </h3>
                       <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
