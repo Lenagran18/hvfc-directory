@@ -13,6 +13,7 @@ import {
   Map,
 } from "lucide-react";
 
+//Adding comment to test API change
 const LocationDirectory = () => {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
