@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
+import Linkify from "react-linkify";
 import {
   Search,
   X,
@@ -244,7 +245,26 @@ const JobBoard = () => {
                       Job Description
                     </h2>
                     <div className="text-slate-700 leading-relaxed whitespace-pre-wrap">
-                      {selectedJob.description || "No description available."}
+                      <Linkify
+                        componentDecorator={(
+                          decoratedHref,
+                          decoratedText,
+                          key
+                        ) => (
+                          <a
+                            href={decoratedHref}
+                            key={key}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {decoratedText}
+                          </a>
+                        )}
+                      >
+                        {selectedJob.description || "No description available."}
+                      </Linkify>
                     </div>
                   </div>
                 </div>
@@ -379,7 +399,26 @@ const JobBoard = () => {
                     Description
                   </h4>
                   <p className="text-gray-600 leading-relaxed line-clamp-2">
-                    {job.description || "No description provided."}
+                    <Linkify
+                      componentDecorator={(
+                        decoratedHref,
+                        decoratedText,
+                        key
+                      ) => (
+                        <a
+                          href={decoratedHref}
+                          key={key}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {decoratedText}
+                        </a>
+                      )}
+                    >
+                      {job.description || "No description provided."}
+                    </Linkify>
                   </p>
                 </div>
               </div>
