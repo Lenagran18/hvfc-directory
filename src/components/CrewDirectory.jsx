@@ -18,6 +18,19 @@ import {
 import { useOutsetaAuth } from "../hooks/useOutsetaAuth";
 
 // Helper function to create URL-friendly slugs
+const sendHeightToParent = () => {
+  if (window.parent !== window) {
+    const height = document.documentElement.scrollHeight;
+    window.parent.postMessage(
+      {
+        type: "resize-crew-directory",
+        height,
+      },
+      "*"
+    );
+  }
+};
+
 const createSlug = (name) => {
   return name
     .toLowerCase()
@@ -93,6 +106,9 @@ const CrewDirectory = () => {
 
         setCrewMembers(transformedData);
         setLoading(false);
+
+        setTimeout(sendHeightToParent, 100);
+        setTimeout(sendHeightToParent, 500);
       } catch (err) {
         console.error("Error fetching from Airtable:", err);
         setError(err.message);
@@ -236,6 +252,21 @@ const CrewDirectory = () => {
       return matchesSearch && matchesFilters;
     });
   }, [crewMembers, searchTerm, selectedDepartments, selectedJobTitles]);
+
+  const scheduleResize = () => {
+    setTimeout(sendHeightToParent, 100);
+    setTimeout(sendHeightToParent, 400);
+  };
+
+  useEffect(scheduleResize, [selectedMember]);
+  useEffect(scheduleResize, [showFilterPanel]);
+  useEffect(scheduleResize, [filteredMembers.length]);  
+  useEffect(() => {
+    sendHeightToParent();
+    window.addEventListener("resize", sendHeightToParent);
+    return () => window.removeEventListener("resize", sendHeightToParent);
+  }, []);
+
 
   const toggleCategory = (categoryName) => {
     setExpandedCategories((prev) => ({
