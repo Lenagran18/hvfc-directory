@@ -13,6 +13,20 @@ import {
   Map,
 } from "lucide-react";
 
+// helpter to send height to parent window
+const sendHeightToParent = () => {
+  if (window.parent !== window) {
+    const height = document.documentElement.scrollHeight;
+    window.parent.postMessage(
+      {
+        type: "resize-crew-directory",
+        height,
+      },
+      "*"
+    );
+  }
+};
+
 //Adding comment to test API change
 const LocationDirectory = () => {
   const [locations, setLocations] = useState([]);
@@ -56,6 +70,9 @@ const LocationDirectory = () => {
 
         setLocations(transformedData);
         setLoading(false);
+
+        setTimeout(sendHeightToParent, 100);
+        setTimeout(sendHeightToParent, 500);
       } catch (err) {
         console.error("Error fetching from Airtable:", err);
         setError(err.message);
@@ -288,7 +305,32 @@ useEffect(() => {
   };
 }, [mapsApiKey, viewMode, filteredLocations, locationCoords, mapsScriptLoaded, selectedLocation]);
 
-  useEffect(() => {
+const scheduleResize = () => {
+  setTimeout(sendHeightToParent, 100);
+  setTimeout(sendHeightToParent, 400);
+  setTimeout(sendHeightToParent, 900);
+};
+
+useEffect(scheduleResize, [selectedLocation]);
+useEffect(scheduleResize, [showFilterPanel]);
+useEffect(scheduleResize, [filteredLocations.length]);
+useEffect(scheduleResize, [viewMode]);
+
+useEffect(() => {
+  sendHeightToParent();
+  window.addEventListener("resize", sendHeightToParent);
+  return () => window.removeEventListener("resize", sendHeightToParent);
+}, []);
+
+useEffect(() => {
+  if (viewMode === "map") {
+    setTimeout(sendHeightToParent, 600);
+    setTimeout(sendHeightToParent, 1200);
+  }
+}, [viewMode, mapsScriptLoaded, filteredLocations.length]);
+
+
+    useEffect(() => {
     if (
       !selectedLocation ||
       !mapsApiKey ||
@@ -342,7 +384,7 @@ useEffect(() => {
     return (
       <div className="min-h-screen bg-white">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <header className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
             <button
               className="flex items-center gap-2 px-3 sm:px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors text-sm sm:text-base"
