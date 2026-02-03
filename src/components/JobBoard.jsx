@@ -14,6 +14,19 @@ import {
 import { useOutsetaAuth } from "../hooks/useOutsetaAuth";
 
 //Helper functions
+const sendHeightToParent = () => {
+  if (window.parent !== window) {
+    const height = document.documentElement.scrollHeight;
+    window.parent.postMessage(
+      {
+        type: "resize-crew-directory",
+        height,
+      },
+      "*"
+    );
+  }
+};
+
 function formatDateRange(start, end) {
   if (!start && !end) return "";
 
@@ -91,6 +104,9 @@ const JobBoard = () => {
 
         setJobs(transformedData);
         setLoading(false);
+
+        setTimeout(sendHeightToParent, 100);
+        setTimeout(sendHeightToParent, 500);
       } catch (err) {
         console.error("Error fetching from Airtable:", err);
         setError(err.message);
@@ -131,9 +147,18 @@ const JobBoard = () => {
   const clearSearch = () => {
     setSearchTerm("");
   };
-
-  //const firstName = user?.FullName ? user.FullName.split(" ")[0].toLowerCase() : "";
-  //const lastName = user?.FullName ? user.FullName.split(" ").slice(1).join(" ").toLowerCase() : "";
+// Scroll height
+  const scheduleResize = () => {
+    setTimeout(sendHeightToParent, 100);
+    setTimeout(sendHeightToParent, 400);
+  };
+  useEffect(scheduleResize, [selectedJob]);
+  useEffect(scheduleResize, [filteredJobs.length]);
+  useEffect(() => {
+    sendHeightToParent();
+    window.addEventListener("resize", sendHeightToParent);
+    return () => window.removeEventListener("resize", sendHeightToParent);
+  }, []);
 
   const handleApply = (job) => {
     const airtableFormUrl = `https://airtable.com/appnUK2pdPioGv0xO/pagqVa9mmRR6PhGju/form?prefill_Job=${job.id}`;
