@@ -16,11 +16,8 @@ import {
 // helpter to send height to parent window
 const sendHeightToParent = () => {
   if (window.parent !== window) {
-    // Use the actual visible content height, not scroll height
     const body = document.body;
     const html = document.documentElement;
-
-    // Get the height of the tallest visible element
     const height = Math.max(
       body.scrollHeight,
       body.offsetHeight,
@@ -374,6 +371,22 @@ useEffect(() => {
       }
     };
   }, [selectedLocation, mapsApiKey, locationCoords]);
+
+  useEffect(() => {
+    if (!("ResizeObserver" in window)) {
+      // Fallback: still at least send once
+      sendHeightToParent();
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      sendHeightToParent();
+    });
+
+    observer.observe(document.body);
+
+    return () => observer.disconnect();
+  }, []);
 
   if (loading) {
     return (
