@@ -16,7 +16,19 @@ import {
 // helpter to send height to parent window
 const sendHeightToParent = () => {
   if (window.parent !== window) {
-    const height = document.documentElement.scrollHeight;
+    // Use the actual visible content height, not scroll height
+    const body = document.body;
+    const html = document.documentElement;
+
+    // Get the height of the tallest visible element
+    const height = Math.max(
+      body.scrollHeight,
+      body.offsetHeight,
+      html.clientHeight,
+      html.scrollHeight,
+      html.offsetHeight
+    );
+
     window.parent.postMessage(
       {
         type: "resize-crew-directory",
@@ -766,7 +778,7 @@ useEffect(() => {
 
             {/* Map View */}
             {viewMode === "map" && mapsApiKey && (
-              <div className="relative h-[600px]">
+              <div className="relative h-[70vh] min-h-[400px] max-h-[700px]">
                 <div ref={mapRef} className="absolute inset-0" />
 
                 {/* Card Overlay */}
