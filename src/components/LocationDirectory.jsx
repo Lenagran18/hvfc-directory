@@ -821,15 +821,22 @@ useEffect(() => {
             {/* Results Count */}
             <div className="mb-4 text-gray-600">
               {filteredLocations.length > 0 ? (
-                <>
-                  Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
-                  {Math.min(
-                    currentPage * ITEMS_PER_PAGE,
-                    filteredLocations.length
-                  )}{" "}
-                  of {filteredLocations.length} location
-                  {filteredLocations.length === 1 ? "" : "s"}
-                </>
+                viewMode === "map" ? (
+                  <>
+                    Showing all {filteredLocations.length} location
+                    {filteredLocations.length === 1 ? "" : "s"}
+                  </>
+                ) : (
+                  <>
+                    Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
+                    {Math.min(
+                      currentPage * ITEMS_PER_PAGE,
+                      filteredLocations.length
+                    )}{" "}
+                    of {filteredLocations.length} location
+                    {filteredLocations.length === 1 ? "" : "s"}
+                  </>
+                )
               ) : (
                 <>Showing 0 locations</>
               )}
