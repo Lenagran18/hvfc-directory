@@ -48,6 +48,10 @@ const LocationDirectory = () => {
   const markersRef = useRef([]);
   const minimapRef = useRef(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 18;
+
   useEffect(() => {
     // Fetch airtable data
     const fetchLocationData = async () => {
@@ -69,7 +73,7 @@ const LocationDirectory = () => {
             address: record.fields.Address || "",
             city: record.fields.City || "",
             state: record.fields.State || "",
-            zipCode: record.fields.ZipCode|| "",
+            zipCode: record.fields.ZipCode || "",
             propertyOwner: record.fields.PropertyOwner || "",
             propertyType: record.fields.PropertyType || "",
             description: record.fields.Description || "",
@@ -171,6 +175,20 @@ const LocationDirectory = () => {
       return matchesSearch && matchesPropertyType;
     });
   }, [locations, searchTerm, selectedPropertyTypes]);
+
+  // Pagination logic
+  const paginatedLocations = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredLocations.slice(startIndex, endIndex);
+  }, [filteredLocations, currentPage]);
+
+  const totalPages = Math.ceil(filteredLocations.length / ITEMS_PER_PAGE);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedPropertyTypes]);
 
   const togglePropertyType = (type) => {
     setSelectedPropertyTypes((prev) =>
@@ -593,8 +611,8 @@ useEffect(() => {
                       Book This Location
                     </h3>
                     <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4">
-                      Interested in booking this location? Contact Hudson Valley Film Commission to
-                      inquire about availability and details.
+                      Interested in booking this location? Contact Hudson Valley
+                      Film Commission to inquire about availability and details.
                     </p>
                     <a
                       href="mailto:info@hudsonvalleyfilmcommission.org?subject=Location Inquiry: "
@@ -607,29 +625,6 @@ useEffect(() => {
                 </div>
 
                 {/* Map */}
-                {/* {mapsApiKey &&
-                  (selectedLocation.address || selectedLocation.city) && (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                      <div className="p-6">
-                        <h3 className="text-lg font-semibold mb-3">
-                          Location Map
-                        </h3>
-                        <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                          <iframe
-                            width="100%"
-                            height="100%"
-                            frameBorder="0"
-                            style={{ border: 0 }}
-                            src={`https://www.google.com/maps/embed/v1/place?key=${mapsApiKey}&q=${encodeURIComponent(
-                              getFullAddress(selectedLocation)
-                            )}`}
-                            allowFullScreen
-                            title="Location Map"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )} */}
                 {mapsApiKey && locationCoords[selectedLocation.id] && (
                   <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                     <div className="p-4 sm:p-6">
@@ -785,8 +780,19 @@ useEffect(() => {
           <div className="flex-1">
             {/* Results Count */}
             <div className="mb-4 text-gray-600">
-              Showing {filteredLocations.length} location
-              {filteredLocations.length === 1 ? "" : "s"}
+              {filteredLocations.length > 0 ? (
+                <>
+                  Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
+                  {Math.min(
+                    currentPage * ITEMS_PER_PAGE,
+                    filteredLocations.length
+                  )}{" "}
+                  of {filteredLocations.length} location
+                  {filteredLocations.length === 1 ? "" : "s"}
+                </>
+              ) : (
+                <>Showing 0 locations</>
+              )}
             </div>
 
             {/* Map View */}
@@ -884,66 +890,187 @@ useEffect(() => {
 
             {/* Location card view */}
             {viewMode === "grid" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredLocations.map((location) => (
-                  <div
-                    key={location.id}
-                    onClick={() => setSelectedLocation(location)}
-                    className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
-                  >
-                    <div className="relative h-48 bg-gray-100 overflow-hidden">
-                      {location.photos && location.photos.length > 0 ? (
-                        <img
-                          src={location.photos[0]?.url || location.photos[0]}
-                          alt={location.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Home className="h-12 w-12 text-gray-400" />
-                        </div>
-                      )}
-                      {location.photos && location.photos.length > 1 && (
-                        <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
-                          <ImageIcon size={12} />
-                          {location.photos.length}
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                        {location.name}
-                      </h3>
-                      {location.propertyType &&
-                      Array.isArray(location.propertyType) ? (
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {location.propertyType.map((type, idx) => (
-                            <span
-                              key={idx}
-                              className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium"
-                            >
-                              {type}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium mb-3">
-                          {location.propertyType}
-                        </span>
-                      )}
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {paginatedLocations.map((location) => (
+                    <div
+                      key={location.id}
+                      onClick={() => setSelectedLocation(location)}
+                      className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
+                    >
+                      <div className="relative h-48 bg-gray-100 overflow-hidden">
+                        {location.photos && location.photos.length > 0 ? (
+                          <img
+                            src={location.photos[0]?.url || location.photos[0]}
+                            alt={location.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Home className="h-12 w-12 text-gray-400" />
+                          </div>
+                        )}
+                        {location.photos && location.photos.length > 1 && (
+                          <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+                            <ImageIcon size={12} />
+                            {location.photos.length}
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                          {location.name}
+                        </h3>
+                        {location.propertyType &&
+                        Array.isArray(location.propertyType) ? (
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {location.propertyType.map((type, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium"
+                              >
+                                {type}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium mb-3">
+                            {location.propertyType}
+                          </span>
+                        )}
 
-                      <div className="flex items-start gap-2 text-sm text-gray-600">
-                        <MapPin size={16} className="flex-shrink-0 mt-0.5" />
-                        <span className="line-clamp-2">
-                          {location.city && location.state
-                            ? `${location.city}, ${location.state}`
-                            : "Location not available"}
-                        </span>
+                        <div className="flex items-start gap-2 text-sm text-gray-600">
+                          <MapPin size={16} className="flex-shrink-0 mt-0.5" />
+                          <span className="line-clamp-2">
+                            {location.city && location.state
+                              ? `${location.city}, ${location.state}`
+                              : "Location not available"}
+                          </span>
+                        </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="mt-8 flex items-center justify-center gap-2 flex-wrap">
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(1, prev - 1))
+                      }
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                    >
+                      Previous
+                    </button>
+
+                    <div className="flex gap-2 flex-wrap justify-center">
+                      {totalPages <= 7 ? (
+                        // Show all pages if 7 or fewer
+                        Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                          (page) => (
+                            <button
+                              key={page}
+                              onClick={() => setCurrentPage(page)}
+                              className={`px-4 py-2 rounded-lg transition-colors ${
+                                currentPage === page
+                                  ? "bg-blue-600 text-white"
+                                  : "border border-gray-300 hover:bg-gray-50"
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          )
+                        )
+                      ) : (
+                        // Show smart pagination with ellipsis for many pages
+                        <>
+                          <button
+                            onClick={() => setCurrentPage(1)}
+                            className={`px-4 py-2 rounded-lg transition-colors ${
+                              currentPage === 1
+                                ? "bg-blue-600 text-white"
+                                : "border border-gray-300 hover:bg-gray-50"
+                            }`}
+                          >
+                            1
+                          </button>
+
+                          {currentPage > 3 && (
+                            <span className="px-2 py-2 text-gray-500">...</span>
+                          )}
+
+                          {currentPage > 2 && currentPage < totalPages - 1 && (
+                            <>
+                              {currentPage > 3 && (
+                                <button
+                                  onClick={() =>
+                                    setCurrentPage(currentPage - 1)
+                                  }
+                                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                  {currentPage - 1}
+                                </button>
+                              )}
+                              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                                {currentPage}
+                              </button>
+                              {currentPage < totalPages - 2 && (
+                                <button
+                                  onClick={() =>
+                                    setCurrentPage(currentPage + 1)
+                                  }
+                                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                  {currentPage + 1}
+                                </button>
+                              )}
+                            </>
+                          )}
+
+                          {currentPage === 2 && (
+                            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                              2
+                            </button>
+                          )}
+
+                          {currentPage === totalPages - 1 && (
+                            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                              {totalPages - 1}
+                            </button>
+                          )}
+
+                          {currentPage < totalPages - 2 && (
+                            <span className="px-2 py-2 text-gray-500">...</span>
+                          )}
+
+                          <button
+                            onClick={() => setCurrentPage(totalPages)}
+                            className={`px-4 py-2 rounded-lg transition-colors ${
+                              currentPage === totalPages
+                                ? "bg-blue-600 text-white"
+                                : "border border-gray-300 hover:bg-gray-50"
+                            }`}
+                          >
+                            {totalPages}
+                          </button>
+                        </>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                      }
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                    >
+                      Next
+                    </button>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
 
             {filteredLocations.length === 0 && (

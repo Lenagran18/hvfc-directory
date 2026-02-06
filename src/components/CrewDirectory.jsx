@@ -44,6 +44,10 @@ const CrewDirectory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 18;
+
   const normalizeMulti = (value) => {
     if (!value) return [];
     if (Array.isArray(value)) {
@@ -253,6 +257,20 @@ const CrewDirectory = () => {
     });
   }, [crewMembers, searchTerm, selectedDepartments, selectedJobTitles]);
 
+  // Pagination logic
+  const paginatedMembers = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredMembers.slice(startIndex, endIndex);
+  }, [filteredMembers, currentPage]);
+
+  const totalPages = Math.ceil(filteredMembers.length / ITEMS_PER_PAGE);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedDepartments, selectedJobTitles]);
+
   const scheduleResize = () => {
     setTimeout(sendHeightToParent, 100);
     setTimeout(sendHeightToParent, 400);
@@ -260,13 +278,14 @@ const CrewDirectory = () => {
 
   useEffect(scheduleResize, [selectedMember]);
   useEffect(scheduleResize, [showFilterPanel]);
-  useEffect(scheduleResize, [filteredMembers.length]);  
+  useEffect(scheduleResize, [filteredMembers.length]);
+  useEffect(scheduleResize, [currentPage]);
+
   useEffect(() => {
     sendHeightToParent();
     window.addEventListener("resize", sendHeightToParent);
     return () => window.removeEventListener("resize", sendHeightToParent);
   }, []);
-
 
   const toggleCategory = (categoryName) => {
     setExpandedCategories((prev) => ({
@@ -727,13 +746,24 @@ const CrewDirectory = () => {
           <div className="flex-1">
             {/* Results Count */}
             <div className="mb-4 text-gray-600">
-              Showing {filteredMembers.length} crew{" "}
-              {filteredMembers.length === 1 ? "member" : "members"}
+              {filteredMembers.length > 0 ? (
+                <>
+                  Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
+                  {Math.min(
+                    currentPage * ITEMS_PER_PAGE,
+                    filteredMembers.length
+                  )}{" "}
+                  of {filteredMembers.length} crew{" "}
+                  {filteredMembers.length === 1 ? "member" : "members"}
+                </>
+              ) : (
+                <>Showing 0 crew members</>
+              )}
             </div>
 
             {/* Member card view */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredMembers.map((member) => (
+              {paginatedMembers.map((member) => (
                 <div
                   key={member.id}
                   onClick={() => handleMemberClick(member)}
@@ -809,6 +839,121 @@ const CrewDirectory = () => {
                 </div>
               ))}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex items-center justify-center gap-2 flex-wrap">
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                >
+                  Previous
+                </button>
+
+                <div className="flex gap-2 flex-wrap justify-center">
+                  {totalPages <= 7 ? (
+                    // Show all pages if 7 or fewer
+                    Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-4 py-2 rounded-lg transition-colors ${
+                            currentPage === page
+                              ? "bg-blue-600 text-white"
+                              : "border border-gray-300 hover:bg-gray-50"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      )
+                    )
+                  ) : (
+                    // Show smart pagination with ellipsis for many pages
+                    <>
+                      <button
+                        onClick={() => setCurrentPage(1)}
+                        className={`px-4 py-2 rounded-lg transition-colors ${
+                          currentPage === 1
+                            ? "bg-blue-600 text-white"
+                            : "border border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        1
+                      </button>
+
+                      {currentPage > 3 && (
+                        <span className="px-2 py-2 text-gray-500">...</span>
+                      )}
+
+                      {currentPage > 2 && currentPage < totalPages - 1 && (
+                        <>
+                          {currentPage > 3 && (
+                            <button
+                              onClick={() => setCurrentPage(currentPage - 1)}
+                              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              {currentPage - 1}
+                            </button>
+                          )}
+                          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                            {currentPage}
+                          </button>
+                          {currentPage < totalPages - 2 && (
+                            <button
+                              onClick={() => setCurrentPage(currentPage + 1)}
+                              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              {currentPage + 1}
+                            </button>
+                          )}
+                        </>
+                      )}
+
+                      {currentPage === 2 && (
+                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                          2
+                        </button>
+                      )}
+
+                      {currentPage === totalPages - 1 && (
+                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                          {totalPages - 1}
+                        </button>
+                      )}
+
+                      {currentPage < totalPages - 2 && (
+                        <span className="px-2 py-2 text-gray-500">...</span>
+                      )}
+
+                      <button
+                        onClick={() => setCurrentPage(totalPages)}
+                        className={`px-4 py-2 rounded-lg transition-colors ${
+                          currentPage === totalPages
+                            ? "bg-blue-600 text-white"
+                            : "border border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        {totalPages}
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            )}
 
             {filteredMembers.length === 0 && (
               <div className="text-center py-12">
