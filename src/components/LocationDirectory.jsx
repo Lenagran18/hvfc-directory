@@ -16,19 +16,34 @@ import {
 // helpter to send height to parent window
 const sendHeightToParent = () => {
   if (window.parent !== window) {
-    requestAnimationFrame(() => {
-      const body = document.body;
-      const html = document.documentElement;
-      const height = Math.max(
-        body.scrollHeight,
-        body.offsetHeight,
-        html.clientHeight,
-        html.scrollHeight,
-        html.offsetHeight
-      );
-      console.log("Sending height:", height);
-      window.parent.postMessage({ type: "resize-crew-directory", height }, "*");
-    });
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        // Get the main container's actual content height
+        const mainContainer = document.querySelector(".min-h-screen");
+
+        let height = 800; // fallback
+
+        if (mainContainer) {
+          // Get all children and find the bottom-most element
+          const children = mainContainer.children;
+          let maxBottom = 0;
+
+          for (let child of children) {
+            const rect = child.getBoundingClientRect();
+            const bottom = rect.bottom + window.scrollY;
+            maxBottom = Math.max(maxBottom, bottom);
+          }
+
+          height = Math.max(maxBottom, 800);
+        }
+
+        console.log("Calculated height from children:", height);
+        window.parent.postMessage(
+          { type: "resize-crew-directory", height },
+          "*"
+        );
+      });
+    }, 50);
   }
 };
 
