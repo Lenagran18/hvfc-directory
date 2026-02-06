@@ -26,6 +26,7 @@ const sendHeightToParent = () => {
         html.scrollHeight,
         html.offsetHeight
       );
+      console.log("Sending height:", height);
       window.parent.postMessage({ type: "resize-crew-directory", height }, "*");
     });
   }
