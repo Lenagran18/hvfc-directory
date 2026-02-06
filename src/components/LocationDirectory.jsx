@@ -16,23 +16,18 @@ import {
 // helpter to send height to parent window
 const sendHeightToParent = () => {
   if (window.parent !== window) {
-    const body = document.body;
-    const html = document.documentElement;
-    const height = Math.max(
-      body.scrollHeight,
-      body.offsetHeight,
-      html.clientHeight,
-      html.scrollHeight,
-      html.offsetHeight
-    );
-
-    window.parent.postMessage(
-      {
-        type: "resize-crew-directory",
-        height,
-      },
-      "*"
-    );
+    requestAnimationFrame(() => {
+      const body = document.body;
+      const html = document.documentElement;
+      const height = Math.max(
+        body.scrollHeight,
+        body.offsetHeight,
+        html.clientHeight,
+        html.scrollHeight,
+        html.offsetHeight
+      );
+      window.parent.postMessage({ type: "resize-crew-directory", height }, "*");
+    });
   }
 };
 
@@ -285,11 +280,9 @@ useEffect(() => {
   const initMap = () => {
     if (!isMounted) return;
 
-    // Remove old markers
     markersRef.current.forEach((marker) => marker.setMap(null));
     markersRef.current = [];
 
-    // Create a new map instance when entering map view
     googleMapRef.current = new window.google.maps.Map(mapRef.current, {
       zoom: 8,
       center: { lat: 41.8, lng: -74.0 },
@@ -298,7 +291,6 @@ useEffect(() => {
     const bounds = new window.google.maps.LatLngBounds();
     let hasMarkers = false;
 
-    // Add markers for filtered locations that have coordinates
     for (const location of filteredLocations) {
       const coords = locationCoords[location.id];
       if (!coords) continue;
@@ -318,6 +310,16 @@ useEffect(() => {
 
     if (hasMarkers) {
       googleMapRef.current.fitBounds(bounds);
+
+      window.google.maps.event.addListenerOnce(
+        googleMapRef.current,
+        "idle",
+        () => {
+          sendHeightToParent();
+        }
+      );
+    } else {
+      sendHeightToParent(); // fallback
     }
   };
 
@@ -325,12 +327,11 @@ useEffect(() => {
 
   return () => {
     isMounted = false;
-    // Clean up markers and nullify map reference
     markersRef.current.forEach((marker) => marker.setMap(null));
     markersRef.current = [];
     googleMapRef.current = null;
   };
-}, [mapsApiKey, viewMode, filteredLocations, locationCoords, mapsScriptLoaded, selectedLocation]);
+}, [mapsApiKey, viewMode, filteredLocations, locationCoords, mapsScriptLoaded]);
 
 const scheduleResize = () => {
   setTimeout(sendHeightToParent, 100);
@@ -356,6 +357,44 @@ useEffect(() => {
   }
 }, [viewMode, mapsScriptLoaded, filteredLocations.length]);
 
+useEffect(() => {
+  // Schedule height updates slightly after the view switches
+  const timeouts = [100, 400, 800];
+  timeouts.forEach((t) => setTimeout(sendHeightToParent, t));
+
+}, [viewMode, filteredLocations.length, selectedLocation]);
+
+// Send height after the DOM settles
+useEffect(() => {
+  const resize = () => sendHeightToParent();
+  const timers = [100, 400, 800, 1200, 1600].map((t) =>
+    setTimeout(resize, t)
+  );
+
+  return () => timers.forEach((t) => clearTimeout(t));
+}, [viewMode, filteredLocations.length, selectedLocation, mapsScriptLoaded]);
+
+const mapRefWrapper = useRef(null);
+
+// ResizeObserver for map container + overlay
+useEffect(() => {
+  if (!mapRefWrapper.current) return;
+  const container = mapRefWrapper.current;
+
+  const observer = new ResizeObserver(() => {
+    sendHeightToParent();
+  });
+
+  observer.observe(container);
+
+  // Send initial height after map renders
+  const timeout = setTimeout(sendHeightToParent, 500);
+
+  return () => {
+    observer.disconnect();
+    clearTimeout(timeout);
+  };
+}, [viewMode, hoveredLocation, filteredLocations.length, mapsScriptLoaded]);
 
     useEffect(() => {
     if (
@@ -401,7 +440,8 @@ useEffect(() => {
       sendHeightToParent();
     });
 
-    observer.observe(document.body);
+      const target = document.querySelector(".min-h-screen");
+      if (target) observer.observe(target);
 
     return () => observer.disconnect();
   }, []);
@@ -797,10 +837,15 @@ useEffect(() => {
 
             {/* Map View */}
             {viewMode === "map" && mapsApiKey && (
-              <div className="relative h-[70vh] min-h-[400px] max-h-[700px]">
-                <div ref={mapRef} className="absolute inset-0" />
+              <div
+                ref={mapRefWrapper}
+                className="relative w-full"
+                style={{ minHeight: 400 }}
+              >
+                {/* Google Map container */}
+                <div ref={mapRef} className="absolute inset-0 w-full h-full" />
 
-                {/* Card Overlay */}
+                {/* Overlay card */}
                 {hoveredLocation && (
                   <div className="absolute bottom-4 right-4 w-11/12 sm:w-96 z-10 pointer-events-none">
                     <div className="bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden pointer-events-auto">
