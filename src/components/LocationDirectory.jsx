@@ -844,13 +844,8 @@ useEffect(() => {
 
             {/* Map View */}
             {viewMode === "map" && mapsApiKey && (
-              <div
-                ref={mapRefWrapper}
-                className="relative w-full"
-                style={{ minHeight: 400 }}
-              >
-                {/* Google Map container */}
-                <div ref={mapRef} className="absolute inset-0 w-full h-full" />
+              <div className="relative h-[600px]">
+                <div ref={mapRef} className="absolute inset-0" />
 
                 {/* Overlay card */}
                 {hoveredLocation && (
