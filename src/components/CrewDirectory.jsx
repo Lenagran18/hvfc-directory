@@ -537,7 +537,7 @@ const CrewDirectory = () => {
                     {/* Show "Become a Member" button only to non-members */}
                     {!isAuthenticated && (
                       <a
-                        href="https://walrus-aqua-5zw3.squarespace.com/become-a-member"
+                        href="https://hudsonvalleyfilmcommission.org/membership"
                         target="_top"
                         className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
                       >

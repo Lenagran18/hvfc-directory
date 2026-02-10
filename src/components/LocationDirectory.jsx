@@ -18,7 +18,6 @@ const sendHeightToParent = () => {
   if (window.parent !== window) {
     setTimeout(() => {
       requestAnimationFrame(() => {
-        // Get the main container's actual content height
         const mainContainer = document.querySelector(".min-h-screen");
 
         let height = 800; // fallback
@@ -37,7 +36,6 @@ const sendHeightToParent = () => {
           height = Math.max(maxBottom, 800);
         }
 
-        console.log("Calculated height from children:", height);
         window.parent.postMessage(
           { type: "resize-crew-directory", height },
           "*"
