@@ -8,7 +8,10 @@ export const useOutsetaAuth = () => {
     useEffect(() => {
         const handleMessage = (event) => {
             //Only accept messages from your Squarespace site
-            const allowedOrigin = 'https://hudsonvalleyfilmcommission.org';
+            const allowedOrigin = [
+                'https://hudsonvalleyfilmcommission.org',
+                'https://www.hudsonvalleyfilmcommission.org'
+            ];
 
             if (event.origin !== allowedOrigin) {
                 console.warn('Received message from unauthorized origin:', event.origin);
@@ -35,7 +38,7 @@ export const useOutsetaAuth = () => {
         if (window.parent !== window) {
             window.parent.postMessage(
                 { type: 'REQUEST_AUTH_STATUS' },
-                'https://hudsonvalleyfilmcommission.org'
+                'https://www.hudsonvalleyfilmcommission.org'
             );
         } else {
             setLoading(false);
