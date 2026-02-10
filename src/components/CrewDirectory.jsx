@@ -38,6 +38,7 @@ const sendHeightToParent = () => {
           }
 
           height = Math.max(maxBottom, 800);
+          console.log("Calculated height:", height, "maxBottom:", maxBottom);
         }
 
         window.parent.postMessage(
@@ -292,6 +293,7 @@ const CrewDirectory = () => {
   const scheduleResize = () => {
     setTimeout(sendHeightToParent, 100);
     setTimeout(sendHeightToParent, 400);
+    setTimeout(sendHeightToParent, 800);
   };
 
   useEffect(scheduleResize, [selectedMember]);
