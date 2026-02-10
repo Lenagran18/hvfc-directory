@@ -772,7 +772,7 @@ const CrewDirectory = () => {
                   <img
                     src={member.photo}
                     alt={member.name}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-64 object-cover object-top"
                   />
                   <div className="p-4">
                     <div className="mb-3">
