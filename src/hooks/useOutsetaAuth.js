@@ -13,7 +13,7 @@ export const useOutsetaAuth = () => {
                 'https://www.hudsonvalleyfilmcommission.org'
             ];
 
-            if (event.origin !== allowedOrigin) {
+            if (!allowedOrigin.includes(event.origin)) {
                 console.warn('Received message from unauthorized origin:', event.origin);
                 return;
             }
