@@ -17,17 +17,35 @@ import {
 } from "lucide-react";
 import { useOutsetaAuth } from "../hooks/useOutsetaAuth";
 
-// Helper function to create URL-friendly slugs
+// Helper functions
 const sendHeightToParent = () => {
   if (window.parent !== window) {
-    const height = document.documentElement.scrollHeight;
-    window.parent.postMessage(
-      {
-        type: "resize-crew-directory",
-        height,
-      },
-      "*"
-    );
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        const mainContainer = document.querySelector(".min-h-screen");
+
+        let height = 800; // fallback
+
+        if (mainContainer) {
+          // Get all children and find the bottom-most element
+          const children = mainContainer.children;
+          let maxBottom = 0;
+
+          for (let child of children) {
+            const rect = child.getBoundingClientRect();
+            const bottom = rect.bottom + window.scrollY;
+            maxBottom = Math.max(maxBottom, bottom);
+          }
+
+          height = Math.max(maxBottom, 800);
+        }
+
+        window.parent.postMessage(
+          { type: "resize-crew-directory", height },
+          "*"
+        );
+      });
+    }, 50);
   }
 };
 
@@ -74,10 +92,10 @@ const CrewDirectory = () => {
         setSelectedMember(null);
       }
     };
-  
+
     handleHashChange();
     window.addEventListener("hashchange", handleHashChange);
-  
+
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, [crewMembers]);
 
@@ -285,6 +303,34 @@ const CrewDirectory = () => {
     sendHeightToParent();
     window.addEventListener("resize", sendHeightToParent);
     return () => window.removeEventListener("resize", sendHeightToParent);
+  }, []);
+
+  // Send height after the DOM settles
+  useEffect(() => {
+    const resize = () => sendHeightToParent();
+    const timers = [100, 400, 800, 1200, 1600].map((t) =>
+      setTimeout(resize, t)
+    );
+
+    return () => timers.forEach((t) => clearTimeout(t));
+  }, [selectedMember, filteredMembers.length, currentPage, showFilterPanel]);
+
+  // ResizeObserver for dynamic content changes
+  useEffect(() => {
+    if (!("ResizeObserver" in window)) {
+      // Fallback: still at least send once
+      sendHeightToParent();
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      sendHeightToParent();
+    });
+
+    const target = document.querySelector(".min-h-screen");
+    if (target) observer.observe(target);
+
+    return () => observer.disconnect();
   }, []);
 
   const toggleCategory = (categoryName) => {
