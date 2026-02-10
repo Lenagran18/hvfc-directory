@@ -63,21 +63,21 @@ const CrewDirectory = () => {
   // Handle hash-based routing
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.slice(1); // Remove the '#'
+      const hash = window.location.hash.slice(1);
       if (hash) {
         const member = crewMembers.find((m) => createSlug(m.name) === hash);
         if (member) {
           setSelectedMember(member);
+          window.scrollTo(0, 0); // Add this line
         }
       } else {
         setSelectedMember(null);
       }
     };
-
-    // Check hash on initial load and when it changes
+  
     handleHashChange();
     window.addEventListener("hashchange", handleHashChange);
-
+  
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, [crewMembers]);
 
@@ -320,6 +320,7 @@ const CrewDirectory = () => {
   const handleMemberClick = (member) => {
     const slug = createSlug(member.name);
     window.location.hash = slug;
+    window.scrollTo(0, 0); // Instant scroll to top
   };
 
   // Handle back to directory
