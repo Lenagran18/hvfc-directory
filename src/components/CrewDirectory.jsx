@@ -87,10 +87,20 @@ const CrewDirectory = () => {
         const member = crewMembers.find((m) => createSlug(m.name) === hash);
         if (member) {
           setSelectedMember(member);
-          window.scrollTo(0, 0); // Add this line
+          window.scrollTo(0, 0); 
+
+          setTimeout(sendHeightToParent, 200);
+          setTimeout(sendHeightToParent, 500);
+          setTimeout(sendHeightToParent, 800);
+          setTimeout(sendHeightToParent, 1200);
         }
       } else {
         setSelectedMember(null);
+
+        setTimeout(sendHeightToParent, 200);
+        setTimeout(sendHeightToParent, 500);
+        setTimeout(sendHeightToParent, 800);
+        setTimeout(sendHeightToParent, 1200);
       }
     };
 
@@ -368,7 +378,6 @@ const CrewDirectory = () => {
   const handleMemberClick = (member) => {
     const slug = createSlug(member.name);
     window.location.hash = slug;
-    window.scrollTo(0, 0); // Instant scroll to top
   };
 
   // Handle back to directory
