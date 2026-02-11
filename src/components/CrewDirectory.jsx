@@ -87,7 +87,7 @@ const CrewDirectory = () => {
         const member = crewMembers.find((m) => createSlug(m.name) === hash);
         if (member) {
           setSelectedMember(member);
-          window.scrollTo(0, 0); 
+          window.scrollTo(0, 0);
 
           setTimeout(sendHeightToParent, 200);
           setTimeout(sendHeightToParent, 500);
@@ -344,6 +344,22 @@ const CrewDirectory = () => {
 
     return () => observer.disconnect();
   }, []);
+
+  // Scroll to top when a member is selected
+  const scrollParentToTop = () => {
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: "scroll-crew-directory-to-top" }, "*");
+    } else {
+      // fallback if not in iframe
+      window.scrollTo({ top: 100, behavior: "smooth" });
+    }
+  };
+
+  useEffect(() => {
+    if (selectedMember) {
+      scrollParentToTop();
+    }
+  }, [selectedMember]);
 
   const toggleCategory = (categoryName) => {
     setExpandedCategories((prev) => ({
