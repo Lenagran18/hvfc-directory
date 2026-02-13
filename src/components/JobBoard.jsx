@@ -160,6 +160,22 @@ const JobBoard = () => {
     return () => window.removeEventListener("resize", sendHeightToParent);
   }, []);
 
+    //Scroll to top of parent window when opening job details
+      const scrollParentToTop = () => {
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: "scroll-crew-directory-to-top" }, "*");
+        } else {
+          // fallback if not in iframe
+          window.scrollTo({ top: 100, behavior: "smooth" });
+        }
+      };
+    
+      useEffect(() => {
+        if (selectedJob) {
+          scrollParentToTop();
+        }
+      }, [selectedJob]);
+
   const handleApply = (job) => {
     const airtableFormUrl = `https://airtable.com/appnUK2pdPioGv0xO/pagqVa9mmRR6PhGju/form?prefill_Job=${job.id}`;
     window.open(airtableFormUrl, "_blank");
