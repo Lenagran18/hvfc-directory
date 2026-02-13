@@ -460,6 +460,22 @@ useEffect(() => {
     return () => observer.disconnect();
   }, []);
 
+  //Scroll to top of parent window when opening location details
+    const scrollParentToTop = () => {
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: "scroll-crew-directory-to-top" }, "*");
+      } else {
+        // fallback if not in iframe
+        window.scrollTo({ top: 100, behavior: "smooth" });
+      }
+    };
+  
+    useEffect(() => {
+      if (selectedLocation) {
+        scrollParentToTop();
+      }
+    }, [selectedLocation]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-600">
