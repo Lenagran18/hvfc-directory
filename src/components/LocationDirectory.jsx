@@ -239,6 +239,19 @@ useEffect(() => {
       // Skip if already geocoded
       if (newCoords[location.id]) continue;
 
+      // Check localStorage cache before making an API call
+      const cacheKey = `hvfc_coords_${location.id}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          newCoords[location.id] = JSON.parse(cached);
+          hasNewCoords = true;
+          continue;
+        } catch (e) {
+          localStorage.removeItem(cacheKey);
+        }
+      }
+
       try {
         const result = await new Promise((resolve, reject) => {
           geocoder.geocode(
@@ -246,7 +259,7 @@ useEffect(() => {
             (results, status) => {
               if (status === "OK") resolve(results[0]);
               else reject(status);
-            }
+            },
           );
         });
         newCoords[location.id] = {
@@ -254,6 +267,8 @@ useEffect(() => {
           lng: result.geometry.location.lng(),
         };
         hasNewCoords = true;
+        // Save to localStorage so future visits skip this API call
+        localStorage.setItem(cacheKey, JSON.stringify(newCoords[location.id]));
         // Small delay to avoid hitting rate limits
         await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (err) {
