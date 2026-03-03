@@ -161,97 +161,135 @@ const CrewDirectory = () => {
 
   const departmentCategories = [
     {
-      name: "Production",
-      jobTitles: ["Producer", "UPM", "Production Coordinator", "Secretarie"],
-    },
-    {
-      name: "Assistant Director",
-      jobTitles: ["1st AD", "2nd AD", "2nd 2nd AD"],
-    },
-    {
-      name: "Camera",
-      jobTitles: ["DP", "Operator", "AC", "Still Photographer"],
-    },
-    {
-      name: "Electric",
-      jobTitles: [
-        "Gaffer",
-        "Best Person",
-        "Genny Operator",
-        "Dimmer Op",
-        "Electric",
-      ],
-    },
-    {
-      name: "Grip",
-      jobTitles: ["Key Grip", "Dolly Grip", "Grip", "Rigger"],
-    },
-    {
-      name: "Properties",
-      jobTitles: ["Prop Master", "Prop", "Armorer", "Food Stylist"],
-    },
-    {
-      name: "Wardrobe/Costumes",
-      jobTitles: [
-        "Designer",
-        "Assistant Designer",
-        "Wardrobe Supervisor",
-        "Set Costumer",
-        "Stylist",
-        "Shopper",
-        "Costume Coordinator",
-        "PA",
-        "Tailor",
-      ],
-    },
-    {
-      name: "Art Department",
-      jobTitles: [
-        "Production Designer",
-        "Art Director",
-        "Set Dressing",
-        "Scenics",
-      ],
-    },
-    {
-      name: "Locations",
-      jobTitles: ["Manager", "Assistant Manager", "Scout"],
-    },
-    {
-      name: "Transportation Department",
-      jobTitles: ["Captain", "Driver"],
-    },
-    {
-      name: "Hair & Make-Up",
-      jobTitles: ["Department Head", "Key"],
-    },
-    {
-      name: "Production Assistant",
-      jobTitles: [],
+      name: "Accounting",
+      jobTitles: ["Accountant", "Payroll"],
     },
     {
       name: "Actor",
       jobTitles: ["Actor"],
     },
     {
+      name: "Art Department",
+      jobTitles: [
+        "Art Director",
+        "Leadman",
+        "Production Designer",
+        "Set Dressing",
+        "Scenics",
+      ],
+    },
+    {
+      name: "Assistant Director",
+      jobTitles: ["1st AD", "2nd AD", "2nd 2nd AD"],
+    },
+    {
       name: "Background Actor",
       jobTitles: ["Background Actor"],
+    },
+    {
+      name: "Camera",
+      jobTitles: [
+        "AC",
+        "DIT",
+        "DP",
+        "Drone Operator",
+        "Operator",
+        "Still Photographer",
+      ],
+    },
+    {
+      name: "Casting",
+      jobTitles: [
+        "Agency & Director",
+        "Assistant Casting Director",
+        "Casting Director",
+      ],
+    },
+    {
+      name: "Electric",
+      jobTitles: [
+        "Best Person",
+        "Dimmer Op",
+        "Electric",
+        "Gaffer",
+        "Genny Operator",
+      ],
+    },
+    {
+      name: "Grip",
+      jobTitles: ["Dolly Grip", "Grip", "Key Grip", "Rigger"],
+    },
+    {
+      name: "Hair & Make-Up",
+      jobTitles: ["Department Head", "Key"],
     },
     {
       name: "Intimacy Coordinator",
       jobTitles: ["Intimacy Coordinator"],
     },
     {
-      name: "Casting",
-      jobTitles: ["Agencies & Director"],
-    },
-    {
-      name: "Accounting",
-      jobTitles: ["Accountant", "Payroll"],
+      name: "Locations",
+      jobTitles: [
+        "Assistant Manager",
+        "Location Manager",
+        "Location Scout",
+        "Scout",
+      ],
     },
     {
       name: "Post-Production",
-      jobTitles: ["Editor", "Colorist", "VFX", "Composer"],
+      jobTitles: [
+        "ADR",
+        "Assistant Editor/Editor",
+        "Color Grading",
+        "Colorist",
+        "Composer",
+        "Editor",
+        "Foley",
+        "Sound Design",
+        "Sound Effects",
+        "Subtitling/Closed Captioning/Dubbing",
+        "VFX",
+        "Visual Effects/VFX",
+      ],
+    },
+    {
+      name: "Production",
+      jobTitles: ["Producer", "Production Coordinator", "Secretary", "UPM"],
+    },
+    {
+      name: "Production Assistant",
+      jobTitles: [],
+    },
+    {
+      name: "Properties",
+      jobTitles: ["Armorer", "Food Stylist", "Prop Master", "Props"],
+    },
+    {
+      name: "Set Medic",
+      jobTitles: ["Set Medic"],
+    },
+    {
+      name: "Transportation Department",
+      jobTitles: ["Captain", "Driver"],
+    },
+    {
+      name: "Wardrobe/Costumes",
+      jobTitles: [
+        "Assistant Designer",
+        "Costume Coordinator",
+        "Designer",
+        "PA",
+        "Set Costumer",
+        "Shopper",
+        "Stylist",
+        "Tailor",
+        "Wardrobe Supervisor",
+      ],
+    },
+    {
+      name: "Other",
+      jobTitles: ["Other"],
     },
   ];
 
