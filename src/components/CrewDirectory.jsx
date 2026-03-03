@@ -337,6 +337,10 @@ const CrewDirectory = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedDepartments, selectedJobTitles]);
+  // Scroll to top when page changes
+  useEffect(() => {
+    scrollParentToTop();
+  }, [currentPage]);
 
   const scheduleResize = () => {
     setTimeout(sendHeightToParent, 100);

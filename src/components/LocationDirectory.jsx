@@ -116,7 +116,7 @@ const LocationDirectory = () => {
     "Animals",
     "Bars",
     "Baseball Fields",
-    "Boat Launch", 
+    "Boat Launch",
     "Bridges & Tunnels",
     "Cabins",
     "Camps & Retreats",
@@ -163,7 +163,7 @@ const LocationDirectory = () => {
       const matchesPropertyType =
         selectedPropertyTypes.length === 0 ||
         selectedPropertyTypes.some((type) =>
-          locationTypes.includes(type.toLowerCase())
+          locationTypes.includes(type.toLowerCase()),
         );
 
       // Collate search fields (name, city, state, address, ALL property types)
@@ -183,7 +183,7 @@ const LocationDirectory = () => {
       const matchesSearch =
         searchTerm === "" ||
         fieldsToSearch.some((field) =>
-          field.includes(searchTerm.toLowerCase())
+          field.includes(searchTerm.toLowerCase()),
         );
 
       return matchesSearch && matchesPropertyType;
@@ -204,9 +204,14 @@ const LocationDirectory = () => {
     setCurrentPage(1);
   }, [searchTerm, selectedPropertyTypes]);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    scrollParentToTop();
+  }, [currentPage]);
+
   const togglePropertyType = (type) => {
     setSelectedPropertyTypes((prev) =>
-      prev.includes(type) ? prev.filter((s) => s !== type) : [...prev, type]
+      prev.includes(type) ? prev.filter((s) => s !== type) : [...prev, type],
     );
   };
 
@@ -226,211 +231,224 @@ const LocationDirectory = () => {
     return parts.join(", ");
   };
 
-const [locationCoords, setLocationCoords] = useState({});
-const [isGeocoding, setIsGeocoding] = useState(false);
-const [mapsScriptLoaded, setMapsScriptLoaded] = useState(false);
+  const [locationCoords, setLocationCoords] = useState({});
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const [mapsScriptLoaded, setMapsScriptLoaded] = useState(false);
 
-// Separate effect for geocoding all locations once
-useEffect(() => {
-  if (!mapsApiKey || locations.length === 0 || isGeocoding) return;
+  // Separate effect for geocoding all locations once
+  useEffect(() => {
+    if (!mapsApiKey || locations.length === 0 || isGeocoding) return;
 
-  const geocodeAllLocations = async () => {
-    setIsGeocoding(true);
-    const geocoder = new window.google.maps.Geocoder();
-    const newCoords = { ...locationCoords };
-    let hasNewCoords = false;
+    const geocodeAllLocations = async () => {
+      setIsGeocoding(true);
+      const geocoder = new window.google.maps.Geocoder();
+      const newCoords = { ...locationCoords };
+      let hasNewCoords = false;
 
-    for (const location of locations) {
-      // Skip if already geocoded
-      if (newCoords[location.id]) continue;
+      for (const location of locations) {
+        // Skip if already geocoded
+        if (newCoords[location.id]) continue;
 
-      // Check localStorage cache before making an API call
-      const cacheKey = `hvfc_coords_${location.id}`;
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) {
+        // Check localStorage cache before making an API call
+        const cacheKey = `hvfc_coords_${location.id}`;
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          try {
+            newCoords[location.id] = JSON.parse(cached);
+            hasNewCoords = true;
+            continue;
+          } catch (e) {
+            localStorage.removeItem(cacheKey);
+          }
+        }
+
         try {
-          newCoords[location.id] = JSON.parse(cached);
+          const result = await new Promise((resolve, reject) => {
+            geocoder.geocode(
+              { address: getFullAddress(location) },
+              (results, status) => {
+                if (status === "OK") resolve(results[0]);
+                else reject(status);
+              },
+            );
+          });
+          newCoords[location.id] = {
+            lat: result.geometry.location.lat(),
+            lng: result.geometry.location.lng(),
+          };
           hasNewCoords = true;
-          continue;
-        } catch (e) {
-          localStorage.removeItem(cacheKey);
+          // Save to localStorage so future visits skip this API call
+          localStorage.setItem(
+            cacheKey,
+            JSON.stringify(newCoords[location.id]),
+          );
+          // Small delay to avoid hitting rate limits
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        } catch (err) {
+          console.error(`Failed to geocode ${location.name}:`, err);
         }
       }
 
-      try {
-        const result = await new Promise((resolve, reject) => {
-          geocoder.geocode(
-            { address: getFullAddress(location) },
-            (results, status) => {
-              if (status === "OK") resolve(results[0]);
-              else reject(status);
-            },
-          );
-        });
-        newCoords[location.id] = {
-          lat: result.geometry.location.lat(),
-          lng: result.geometry.location.lng(),
-        };
-        hasNewCoords = true;
-        // Save to localStorage so future visits skip this API call
-        localStorage.setItem(cacheKey, JSON.stringify(newCoords[location.id]));
-        // Small delay to avoid hitting rate limits
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      } catch (err) {
-        console.error(`Failed to geocode ${location.name}:`, err);
+      if (hasNewCoords) {
+        setLocationCoords(newCoords);
       }
-    }
+      setIsGeocoding(false);
+    };
 
-    if (hasNewCoords) {
-      setLocationCoords(newCoords);
-    }
-    setIsGeocoding(false);
-  };
-
-  // Load Google Maps script if not loaded
-  if (!window.google) {
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}`;
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
-    script.onload = () => {
+    // Load Google Maps script if not loaded
+    if (!window.google) {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+      script.onload = () => {
+        setMapsScriptLoaded(true);
+        geocodeAllLocations();
+      };
+    } else {
       setMapsScriptLoaded(true);
       geocodeAllLocations();
-    };
-  } else {
-    setMapsScriptLoaded(true);
-    geocodeAllLocations();
-  }
-}, [mapsApiKey, locations, isGeocoding, locationCoords]);
+    }
+  }, [mapsApiKey, locations, isGeocoding, locationCoords]);
 
-// Rendering map with markers
-useEffect(() => {
-  if (!mapsApiKey || viewMode !== "map" || !mapRef.current || !mapsScriptLoaded)
-    return;
+  // Rendering map with markers
+  useEffect(() => {
+    if (
+      !mapsApiKey ||
+      viewMode !== "map" ||
+      !mapRef.current ||
+      !mapsScriptLoaded
+    )
+      return;
 
-  let isMounted = true;
+    let isMounted = true;
 
-  const initMap = () => {
-    if (!isMounted) return;
+    const initMap = () => {
+      if (!isMounted) return;
 
-    markersRef.current.forEach((marker) => marker.setMap(null));
-    markersRef.current = [];
+      markersRef.current.forEach((marker) => marker.setMap(null));
+      markersRef.current = [];
 
-    googleMapRef.current = new window.google.maps.Map(mapRef.current, {
-      zoom: 8,
-      center: { lat: 41.8, lng: -74.0 },
-    });
-
-    const bounds = new window.google.maps.LatLngBounds();
-    let hasMarkers = false;
-
-    for (const location of filteredLocations) {
-      const coords = locationCoords[location.id];
-      if (!coords) continue;
-
-      const marker = new window.google.maps.Marker({
-        position: coords,
-        map: googleMapRef.current,
-        title: location.name,
-        animation: window.google.maps.Animation.DROP,
+      googleMapRef.current = new window.google.maps.Map(mapRef.current, {
+        zoom: 8,
+        center: { lat: 41.8, lng: -74.0 },
       });
 
-      marker.addListener("click", () => setHoveredLocation(location));
-      markersRef.current.push(marker);
-      bounds.extend(coords);
-      hasMarkers = true;
-    }
+      const bounds = new window.google.maps.LatLngBounds();
+      let hasMarkers = false;
 
-    if (hasMarkers) {
-      googleMapRef.current.fitBounds(bounds);
+      for (const location of filteredLocations) {
+        const coords = locationCoords[location.id];
+        if (!coords) continue;
 
-      window.google.maps.event.addListenerOnce(
-        googleMapRef.current,
-        "idle",
-        () => {
-          sendHeightToParent();
-        }
-      );
-    } else {
-      sendHeightToParent(); // fallback
-    }
+        const marker = new window.google.maps.Marker({
+          position: coords,
+          map: googleMapRef.current,
+          title: location.name,
+          animation: window.google.maps.Animation.DROP,
+        });
+
+        marker.addListener("click", () => setHoveredLocation(location));
+        markersRef.current.push(marker);
+        bounds.extend(coords);
+        hasMarkers = true;
+      }
+
+      if (hasMarkers) {
+        googleMapRef.current.fitBounds(bounds);
+
+        window.google.maps.event.addListenerOnce(
+          googleMapRef.current,
+          "idle",
+          () => {
+            sendHeightToParent();
+          },
+        );
+      } else {
+        sendHeightToParent(); // fallback
+      }
+    };
+
+    initMap();
+
+    return () => {
+      isMounted = false;
+      markersRef.current.forEach((marker) => marker.setMap(null));
+      markersRef.current = [];
+      googleMapRef.current = null;
+    };
+  }, [
+    mapsApiKey,
+    viewMode,
+    filteredLocations,
+    locationCoords,
+    mapsScriptLoaded,
+  ]);
+
+  const scheduleResize = () => {
+    setTimeout(sendHeightToParent, 100);
+    setTimeout(sendHeightToParent, 400);
+    setTimeout(sendHeightToParent, 900);
   };
 
-  initMap();
+  useEffect(scheduleResize, [selectedLocation]);
+  useEffect(scheduleResize, [showFilterPanel]);
+  useEffect(scheduleResize, [filteredLocations.length]);
+  useEffect(scheduleResize, [viewMode]);
 
-  return () => {
-    isMounted = false;
-    markersRef.current.forEach((marker) => marker.setMap(null));
-    markersRef.current = [];
-    googleMapRef.current = null;
-  };
-}, [mapsApiKey, viewMode, filteredLocations, locationCoords, mapsScriptLoaded]);
-
-const scheduleResize = () => {
-  setTimeout(sendHeightToParent, 100);
-  setTimeout(sendHeightToParent, 400);
-  setTimeout(sendHeightToParent, 900);
-};
-
-useEffect(scheduleResize, [selectedLocation]);
-useEffect(scheduleResize, [showFilterPanel]);
-useEffect(scheduleResize, [filteredLocations.length]);
-useEffect(scheduleResize, [viewMode]);
-
-useEffect(() => {
-  sendHeightToParent();
-  window.addEventListener("resize", sendHeightToParent);
-  return () => window.removeEventListener("resize", sendHeightToParent);
-}, []);
-
-useEffect(() => {
-  if (viewMode === "map") {
-    setTimeout(sendHeightToParent, 600);
-    setTimeout(sendHeightToParent, 1200);
-  }
-}, [viewMode, mapsScriptLoaded, filteredLocations.length]);
-
-useEffect(() => {
-  // Schedule height updates slightly after the view switches
-  const timeouts = [100, 400, 800];
-  timeouts.forEach((t) => setTimeout(sendHeightToParent, t));
-
-}, [viewMode, filteredLocations.length, selectedLocation]);
-
-// Send height after the DOM settles
-useEffect(() => {
-  const resize = () => sendHeightToParent();
-  const timers = [100, 400, 800, 1200, 1600].map((t) =>
-    setTimeout(resize, t)
-  );
-
-  return () => timers.forEach((t) => clearTimeout(t));
-}, [viewMode, filteredLocations.length, selectedLocation, mapsScriptLoaded]);
-
-const mapRefWrapper = useRef(null);
-
-// ResizeObserver for map container + overlay
-useEffect(() => {
-  if (!mapRefWrapper.current) return;
-  const container = mapRefWrapper.current;
-
-  const observer = new ResizeObserver(() => {
+  useEffect(() => {
     sendHeightToParent();
-  });
+    window.addEventListener("resize", sendHeightToParent);
+    return () => window.removeEventListener("resize", sendHeightToParent);
+  }, []);
 
-  observer.observe(container);
+  useEffect(() => {
+    if (viewMode === "map") {
+      setTimeout(sendHeightToParent, 600);
+      setTimeout(sendHeightToParent, 1200);
+    }
+  }, [viewMode, mapsScriptLoaded, filteredLocations.length]);
 
-  // Send initial height after map renders
-  const timeout = setTimeout(sendHeightToParent, 500);
+  useEffect(() => {
+    // Schedule height updates slightly after the view switches
+    const timeouts = [100, 400, 800];
+    timeouts.forEach((t) => setTimeout(sendHeightToParent, t));
+  }, [viewMode, filteredLocations.length, selectedLocation]);
 
-  return () => {
-    observer.disconnect();
-    clearTimeout(timeout);
-  };
-}, [viewMode, hoveredLocation, filteredLocations.length, mapsScriptLoaded]);
+  // Send height after the DOM settles
+  useEffect(() => {
+    const resize = () => sendHeightToParent();
+    const timers = [100, 400, 800, 1200, 1600].map((t) =>
+      setTimeout(resize, t),
+    );
 
-    useEffect(() => {
+    return () => timers.forEach((t) => clearTimeout(t));
+  }, [viewMode, filteredLocations.length, selectedLocation, mapsScriptLoaded]);
+
+  const mapRefWrapper = useRef(null);
+
+  // ResizeObserver for map container + overlay
+  useEffect(() => {
+    if (!mapRefWrapper.current) return;
+    const container = mapRefWrapper.current;
+
+    const observer = new ResizeObserver(() => {
+      sendHeightToParent();
+    });
+
+    observer.observe(container);
+
+    // Send initial height after map renders
+    const timeout = setTimeout(sendHeightToParent, 500);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(timeout);
+    };
+  }, [viewMode, hoveredLocation, filteredLocations.length, mapsScriptLoaded]);
+
+  useEffect(() => {
     if (
       !selectedLocation ||
       !mapsApiKey ||
@@ -474,27 +492,27 @@ useEffect(() => {
       sendHeightToParent();
     });
 
-      const target = document.querySelector(".min-h-screen");
-      if (target) observer.observe(target);
+    const target = document.querySelector(".min-h-screen");
+    if (target) observer.observe(target);
 
     return () => observer.disconnect();
   }, []);
 
   //Scroll to top of parent window when opening location details
-    const scrollParentToTop = () => {
-      if (window.parent !== window) {
-        window.parent.postMessage({ type: "scroll-crew-directory-to-top" }, "*");
-      } else {
-        // fallback if not in iframe
-        window.scrollTo({ top: 100, behavior: "smooth" });
-      }
-    };
-  
-    useEffect(() => {
-      if (selectedLocation) {
-        scrollParentToTop();
-      }
-    }, [selectedLocation]);
+  const scrollParentToTop = () => {
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: "scroll-crew-directory-to-top" }, "*");
+    } else {
+      // fallback if not in iframe
+      window.scrollTo({ top: 100, behavior: "smooth" });
+    }
+  };
+
+  useEffect(() => {
+    if (selectedLocation) {
+      scrollParentToTop();
+    }
+  }, [selectedLocation]);
 
   if (loading) {
     return (
@@ -559,7 +577,7 @@ useEffect(() => {
                                 setSelectedCurrentPhotoIndex((prev) =>
                                   prev === 0
                                     ? selectedLocation.photos.length - 1
-                                    : prev - 1
+                                    : prev - 1,
                                 )
                               }
                               className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 sm:p-2 rounded-full shadow-lg"
@@ -584,7 +602,7 @@ useEffect(() => {
                                 setSelectedCurrentPhotoIndex((prev) =>
                                   prev === selectedLocation.photos.length - 1
                                     ? 0
-                                    : prev + 1
+                                    : prev + 1,
                                 )
                               }
                               className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 sm:p-2 rounded-full shadow-lg"
@@ -881,7 +899,7 @@ useEffect(() => {
                     Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
                     {Math.min(
                       currentPage * ITEMS_PER_PAGE,
-                      filteredLocations.length
+                      filteredLocations.length,
                     )}{" "}
                     of {filteredLocations.length} location
                     {filteredLocations.length === 1 ? "" : "s"}
@@ -955,7 +973,7 @@ useEffect(() => {
                                     >
                                       {type}
                                     </span>
-                                  )
+                                  ),
                                 )}
                               </div>
                             ) : (
@@ -1078,7 +1096,7 @@ useEffect(() => {
                             >
                               {page}
                             </button>
-                          )
+                          ),
                         )
                       ) : (
                         // Show smart pagination with ellipsis for many pages
@@ -1184,6 +1202,6 @@ useEffect(() => {
       </div>
     </div>
   );
-};
+};;
 
 export default LocationDirectory;
