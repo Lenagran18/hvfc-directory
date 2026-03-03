@@ -65,7 +65,7 @@ const CrewDirectory = () => {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 18;
+  const ITEMS_PER_PAGE = 36;
 
   const normalizeMulti = (value) => {
     if (!value) return [];
@@ -752,7 +752,7 @@ const CrewDirectory = () => {
                           <input
                             type="checkbox"
                             checked={selectedDepartments.includes(
-                              category.name
+                              category.name,
                             )}
                             onChange={(e) => {
                               e.stopPropagation();
@@ -825,7 +825,7 @@ const CrewDirectory = () => {
                   Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
                   {Math.min(
                     currentPage * ITEMS_PER_PAGE,
-                    filteredMembers.length
+                    filteredMembers.length,
                   )}{" "}
                   of {filteredMembers.length} crew{" "}
                   {filteredMembers.length === 1 ? "member" : "members"}
@@ -836,18 +836,25 @@ const CrewDirectory = () => {
             </div>
 
             {/* Member card view */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {paginatedMembers.map((member) => (
                 <div
                   key={member.id}
                   onClick={() => handleMemberClick(member)}
                   className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
                 >
-                  <img
-                    src={member.photo}
-                    alt={member.name}
-                    className="w-full h-64 object-cover object-top"
-                  />
+                  <div style={{ aspectRatio: "4/3", overflow: "hidden" }}>
+                    <img
+                      src={member.photo}
+                      alt={member.name}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        objectPosition: "top",
+                      }}
+                    />
+                  </div>
                   <div className="p-4">
                     <div className="mb-3">
                       {/* Name and department tags in same flex container */}
@@ -943,7 +950,7 @@ const CrewDirectory = () => {
                         >
                           {page}
                         </button>
-                      )
+                      ),
                     )
                   ) : (
                     // Show smart pagination with ellipsis for many pages
