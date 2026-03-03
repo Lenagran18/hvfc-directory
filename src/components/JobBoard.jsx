@@ -16,14 +16,26 @@ import { useOutsetaAuth } from "../hooks/useOutsetaAuth";
 //Helper functions
 const sendHeightToParent = () => {
   if (window.parent !== window) {
-    const height = document.documentElement.scrollHeight;
-    window.parent.postMessage(
-      {
-        type: "resize-crew-directory",
-        height,
-      },
-      "*"
-    );
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        const mainContainer = document.querySelector(".min-h-screen");
+        let height = 800;
+        if (mainContainer) {
+          const children = mainContainer.children;
+          let maxBottom = 0;
+          for (let child of children) {
+            const rect = child.getBoundingClientRect();
+            const bottom = rect.bottom + window.scrollY;
+            maxBottom = Math.max(maxBottom, bottom);
+          }
+          height = Math.max(maxBottom, 800);
+        }
+        window.parent.postMessage(
+          { type: "resize-crew-directory", height },
+          "*",
+        );
+      });
+    }, 50);
   }
 };
 
@@ -151,6 +163,8 @@ const JobBoard = () => {
   const scheduleResize = () => {
     setTimeout(sendHeightToParent, 100);
     setTimeout(sendHeightToParent, 400);
+    setTimeout(sendHeightToParent, 800);
+    setTimeout(sendHeightToParent, 1400);
   };
   useEffect(scheduleResize, [selectedJob]);
   useEffect(scheduleResize, [filteredJobs.length]);
@@ -158,6 +172,17 @@ const JobBoard = () => {
     sendHeightToParent();
     window.addEventListener("resize", sendHeightToParent);
     return () => window.removeEventListener("resize", sendHeightToParent);
+  }, []);
+
+  useEffect(() => {
+    if (!("ResizeObserver" in window)) {
+      sendHeightToParent();
+      return;
+    }
+    const observer = new ResizeObserver(() => sendHeightToParent());
+    const target = document.querySelector(".min-h-screen");
+    if (target) observer.observe(target);
+    return () => observer.disconnect();
   }, []);
 
     //Scroll to top of parent window when opening job details
@@ -199,7 +224,7 @@ const JobBoard = () => {
 
   if (selectedJob) {
     return (
-      <div>
+      <div className="min-h-screen bg-white">
         <header className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <button
@@ -258,7 +283,7 @@ const JobBoard = () => {
                             <Calendar className="h-4 w-4 text-gray-400" />
                             {formatDateRange(
                               selectedJob.startDate,
-                              selectedJob.endDate
+                              selectedJob.endDate,
                             )}
                           </div>
                         )}
@@ -290,7 +315,7 @@ const JobBoard = () => {
                         componentDecorator={(
                           decoratedHref,
                           decoratedText,
-                          key
+                          key,
                         ) => (
                           <a
                             href={decoratedHref}
