@@ -251,6 +251,7 @@ const CrewDirectory = () => {
         "Subtitling/Closed Captioning/Dubbing",
         "VFX",
         "Visual Effects/VFX",
+        "Music Supervisor",
       ],
     },
     {
