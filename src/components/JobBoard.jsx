@@ -88,14 +88,14 @@ const JobBoard = () => {
     const fetchJobs = async () => {
       try {
         const response = await axios.get("/.netlify/functions/getJobs");
-        const today = new Date();
+        //const today = new Date();
 
         const transformedData = response.data.records
           .filter((record) => {
             const approved = record.fields.Approved === true; // Only show approved jobs
             
-            const endDate = record.fields.EndDate ? new Date(record.fields.EndDate) : null;
-            return approved && endDate && endDate >= today;
+            //const endDate = record.fields.EndDate ? new Date(record.fields.EndDate) : null;
+            return approved; //&& endDate && endDate >= today;
           })
           .map((record) => ({
             id: record.id,
