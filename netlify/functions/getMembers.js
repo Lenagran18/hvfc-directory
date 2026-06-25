@@ -17,19 +17,30 @@ exports.handler = async (event, context) => {
     const baseId = process.env.AIRTABLE_BASE_ID;
     const tableName = process.env.AIRTABLE_TABLE_NAME;
 
-    const response = await axios.get(
-      `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName || '')}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const allRecords = [];
+    let offset = null;
+
+    do {
+        const params = {};
+        if (offset) params.offset = offset;
+
+        const response = await axios.get(
+            `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName || '')}`,
+            {
+                headers: { Authorization: `Bearer ${token}` },
+                params,
+            }
+        );
+
+        allRecords.push(...response.data.records);
+        offset = response.data.offset;
+
+    } while (offset);
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify(response.data)
+      body: JSON.stringify({ records: allRecords })
     };
   } catch (error) {
     return {
